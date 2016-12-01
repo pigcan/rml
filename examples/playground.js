@@ -3,10 +3,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const defaultValue = `
-<div r:for="{{items}}" r:key="key">
-    <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">
-       {{item.value}} more than one
-    </div>
+<div>
+  <div r:for="{{items}}" r:key="key" r:for-index="i">
+      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">
+         {{item.value}} more than one at {{i}}
+      </div>
+  </div>
 </div>
 `;
 
