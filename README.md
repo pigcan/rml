@@ -1,7 +1,7 @@
 # rml
 ---
 
-An alternate markup language to react jsx
+An alternate markup language to react jsx. inspired by [wxml](https://mp.weixin.qq.com/debug/wxadoc/dev/framework/view/wxml).
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
