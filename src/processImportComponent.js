@@ -11,11 +11,11 @@ module.exports = function processImport(dep) {
       noScope: 1,
       enter(path) {
         const { node } = path;
-        if (node.type === 'ObjectProperty') {
+        if (node.type === 'ObjectProperty' && node.key && node.key.name) {
           const info = {
             name: node.key.name,
           };
-          if (node.value.name !== node.key.name) {
+          if (node.value && node.value.name && node.value.name !== node.key.name) {
             info.as = node.value.name;
           }
           ret.push(info);

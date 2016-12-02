@@ -13,8 +13,8 @@ describe('block', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -42,8 +42,8 @@ describe('block', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -73,9 +73,9 @@ describe('block', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -109,8 +109,8 @@ describe('block', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -152,8 +152,8 @@ describe('block', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -190,9 +190,9 @@ describe('block', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,

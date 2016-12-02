@@ -19,8 +19,8 @@ describe('MLTransformer', () => {
       '</div>',
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div`,
         `      prop = {(state.a + state.b)}`,
@@ -50,9 +50,9 @@ describe('MLTransformer', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div`,
         `      checked`,
@@ -71,8 +71,8 @@ describe('MLTransformer', () => {
       `</div>`,
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div`,
         `      checked = {(false)}`,
@@ -85,19 +85,47 @@ describe('MLTransformer', () => {
     });
   });
 
-  it('support inline style', (done) => {
+  it('allowImportComponent', (done) => {
     new MLTransformer([
-      '<div style="display:flex;flex:1">',
-      '</div>',
-    ].join('\n')).transform((err, code) => {
+      `<import-component name="X" from="y" />`,
+      `<import-component name="{Z, Q:Y}" from="y" />`,
+      `<X><Y/><Z/></X>`,
+    ].join('\n'), {
+      allowImportComponent: true,
+    }).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
-        `module.exports = function render({ state }) {`,
+        `import React from 'react';`,
+        `import X from 'y';`,
+        `import { Z, Q as Y } from 'y';`,
+        `export default function render({ state }) {`,
         `  return (`,
-        `    <div`,
-        `      style = "display:flex;flex:1"`,
-        `    >`,
-        `    </div>`,
+        `    <X>`,
+        `      <Y>`,
+        `      </Y>`,
+        `      <Z>`,
+        `      </Z>`,
+        `    </X>`,
+        `  );`,
+        `};`,
+      ].join('\n'));
+      done();
+    });
+  });
+
+  it('allowScript', (done) => {
+    new MLTransformer([
+      `<script>var x = 1;</script>`,
+      `<X/>`,
+    ].join('\n'), {
+      allowScript: true,
+    }).transform((err, code) => {
+      expect(code).to.eql([
+        `import React from 'react';`,
+        `var x = 1;`,
+        `export default function render({ state }) {`,
+        `  return (`,
+        `    <X>`,
+        `    </X>`,
         `  );`,
         `};`,
       ].join('\n'));
