@@ -29,27 +29,6 @@ function camelCase(name) {
   return name.replace(/-(\w)/g, (w, g) => g.toUpperCase());
 }
 
-function transformStyleFileName(name) {
-  const extname = path.extname(name);
-  return name.replace(new RegExp(`\\${extname}$`), '$Style');
-}
-
-function toComponentName(str) {
-  const ret = camelCase(str);
-  return ret.charAt(0).toUpperCase() + ret.slice(1);
-}
-
-const renderSuffix = '$Render';
-
-function transformTemplateName(name) {
-  const extname = path.extname(name);
-  return name.replace(new RegExp(`\\${extname}$`), renderSuffix);
-}
-
-function getTemplateRenderName(name) {
-  return `${name}${renderSuffix}`;
-}
-
 function transformAbsoluteToRelative(projectRoot, filepath, absolutePath) {
   let retPath = absolutePath;
   const firstChar = retPath.charAt(0);
@@ -70,11 +49,7 @@ module.exports = {
   camelCase,
   startsWith,
   transformAbsoluteToRelative,
-  transformTemplateName,
-  getTemplateRenderName,
-  transformStyleFileName,
   relative,
-  toComponentName,
   padding,
   isNumber,
 };

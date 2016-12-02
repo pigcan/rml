@@ -15,9 +15,9 @@ describe('MLTransformer', () => {
         `</div>`,
       ].join('\n')).transform((err, code) => {
         expect(code).to.eql([
-          `const React = require('react');`,
+          `import React from 'react';`,
           `let $templates$ = {};`,
-          `const $ownTemplates$ = {};`,
+          `export const $ownTemplates$ = {};`,
           `$ownTemplates$['t'] = function (state) {`,
           `  return (`,
           `    <div>`,
@@ -26,14 +26,13 @@ describe('MLTransformer', () => {
           `  );`,
           `};`,
           `$templates$ = $ownTemplates$;`,
-          `module.exports = function render({ state }) {`,
+          `export default function render({ state }) {`,
           `  return (`,
           `    <div>`,
           `      { $templates$[(state.x % 2 ? 't' : 'z')].call(this, (({ ...state.o }))) }`,
           `    </div>`,
           `  );`,
           `};`,
-          `module.exports.$ownTemplates$ = $ownTemplates$;`,
         ].join('\n'));
         done();
       });
@@ -41,7 +40,7 @@ describe('MLTransformer', () => {
 
     it('support import', (done) => {
       new MLTransformer([
-        `<import src="a.html" />`,
+        `<import src="a.rml" />`,
         `<template name="t">`,
         `<div>{{z}}</div>`,
         `</template>`,
@@ -50,11 +49,11 @@ describe('MLTransformer', () => {
         `</div>`,
       ].join('\n')).transform((err, code) => {
         expect(code).to.eql([
-          `const React = require('react');`,
-          `const assign = require('object-assign');`,
-          `const { $ownTemplates$: $ownTemplates$1 } = require('./a$Render');`,
+          `import React from 'react';`,
+          `import assign from 'object-assign';`,
+          `import { $ownTemplates$ as $ownTemplates$1 } from './a.rml';`,
           `let $templates$ = {};`,
-          `const $ownTemplates$ = {};`,
+          `export const $ownTemplates$ = {};`,
           `$ownTemplates$['t'] = function (state) {`,
           `  return (`,
           `    <div>`,
@@ -63,14 +62,13 @@ describe('MLTransformer', () => {
           `  );`,
           `};`,
           `$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);`,
-          `module.exports = function render({ state }) {`,
+          `export default function render({ state }) {`,
           `  return (`,
           `    <div>`,
           `      { $templates$['t'].call(this, (({ o: state.o }))) }`,
           `    </div>`,
           `  );`,
           `};`,
-          `module.exports.$ownTemplates$ = $ownTemplates$;`,
         ].join('\n'));
         done();
       });
@@ -78,24 +76,23 @@ describe('MLTransformer', () => {
 
     it('support import absolute', (done) => {
       new MLTransformer([
-        `<import src="/a.html" />`,
+        `<import src="/a.rml" />`,
       ].join('\n'), {
         projectRoot: process.cwd(),
         renderPath: __filename,
       }).transform((err, code) => {
         expect(code).to.eql([
-          `const React = require('react');`,
-          `const assign = require('object-assign');`,
-          `const { $ownTemplates$: $ownTemplates$1 } = require('../../a$Render');`,
+          `import React from 'react';`,
+          `import assign from 'object-assign';`,
+          `import { $ownTemplates$ as $ownTemplates$1 } from '../../a.rml';`,
           `let $templates$ = {};`,
-          `const $ownTemplates$ = {};`,
+          `export const $ownTemplates$ = {};`,
           `$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);`,
-          `module.exports = function render({ state }) {`,
+          `export default function render({ state }) {`,
           `  return (`,
           `null`,
           `  );`,
           `};`,
-          `module.exports.$ownTemplates$ = $ownTemplates$;`,
         ].join('\n'));
         done();
       });
@@ -106,14 +103,13 @@ describe('MLTransformer', () => {
     it('support simple', (done) => {
       new MLTransformer([
         `<div>`,
-        `<include src="a.html" />`,
+        `<include src="a.rml" />`,
         `</div>`,
       ].join('\n')).transform((err, code) => {
         expect(code).to.eql([
-          `const React = require('react');`,
-
-          `const $render$1 = require('./a$Render');`,
-          `module.exports = function render({ state }) {`,
+          `import React from 'react';`,
+          `import $render$1 from './a.rml';`,
+          `export default function render({ state }) {`,
           `  return (`,
           `    <div>`,
           `      { $render$1.apply(this, arguments) }`,

@@ -35,6 +35,10 @@ http://yiminghe.github.io/rml/examples/playground.html
 </div>
 ```
 
+## webpack-loader
+
+https://github.com/yiminghe/rml-loader
+
 ## syntax
 
 for details checkout: https://github.com/yiminghe/rml/blob/master/tests/specs

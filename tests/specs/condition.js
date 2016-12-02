@@ -12,9 +12,9 @@ describe('conditional render', () => {
       '</div>',
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -46,9 +46,9 @@ describe('conditional render', () => {
       '</div>',
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -90,9 +90,9 @@ describe('conditional render', () => {
       '</div>',
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -137,9 +137,9 @@ describe('conditional render', () => {
       '</div>',
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -189,9 +189,9 @@ describe('conditional render', () => {
       '</div>',
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
-        `const React = require('react');`,
+        `import React from 'react';`,
 
-        `module.exports = function render({ state }) {`,
+        `export default function render({ state }) {`,
         `  return (`,
         `    <div>`,
         `      {`,

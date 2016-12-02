@@ -7,8 +7,8 @@ const transformExpression = require('./transformExpression');
 const utils = require('./utils');
 const processImportComponent = require('./processImportComponent');
 
+const IMPORT = 'import';
 const {
-  transformTemplateName,
   camelCase,
   padding, startsWith,
   isNumber, transformAbsoluteToRelative,
@@ -17,6 +17,8 @@ const { hasExpression } = transformExpression;
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
 
+const HEADER = `export default function render({ state }) {`;
+
 function defaultImportComponent() {
   return false;
 }
@@ -24,7 +26,6 @@ function defaultImportComponent() {
 function MLTransformer(template, config_) {
   const config = config_ || {};
   this.config = config;
-  this.headerStatement = config.header || `module.exports = function render({ state }) {`;
   const { templateNamespace = 'r' } = config;
   this.IF_ATTR_NAME = `${templateNamespace}:if`;
   this.ELIF_ATTR_NAME = `${templateNamespace}:elif`;
@@ -49,7 +50,7 @@ function MLTransformer(template, config_) {
   this.projectRoot = config.projectRoot || cwd;
   this.importComponent = config.importComponent || defaultImportComponent;
   this.header = [
-    `const React = require('react');`,
+    `import React from 'react';`,
   ];
   this.subTemplatesCode = {};
   this.code = [];
@@ -111,7 +112,7 @@ assign(MLTransformer.prototype, {
       }
 
       if (Object.keys(importTplDeps).length) {
-        header.push(`const assign = require('object-assign');`);
+        header.push(`import assign from 'object-assign';`);
       }
       Object.keys(componentDeps).forEach((dep) => {
         const importStatement = importComponent(dep);
@@ -122,19 +123,19 @@ assign(MLTransformer.prototype, {
       const subTemplatesName = [];
       Object.keys(importTplDeps).forEach((dep) => {
         const index = importTplDeps[dep];
-        header.push(`const { $ownTemplates$: $ownTemplates$${index} } ` +
-          `= ${'require'}('${transformTemplateName(dep)}');`);
+        header.push(`${IMPORT} { $ownTemplates$ as $ownTemplates$${index} } ` +
+          `from '${dep}';`);
         subTemplatesName.push(`$ownTemplates$${index}`);
       });
       Object.keys(includeTplDeps).forEach((dep) => {
         const index = includeTplDeps[dep];
-        header.push(`const $render$${index} = ${'require'}('${transformTemplateName(dep)}');`);
+        header.push(`${IMPORT} $render$${index} from '${dep}';`);
       });
       const needTemplate = Object.keys(subTemplatesCode).length ||
         Object.keys(importTplDeps).length;
       if (needTemplate) {
         header.push(`let $templates$ = {};`);
-        header.push(`const $ownTemplates$ = {};`);
+        header.push(`export const $ownTemplates$ = {};`);
       }
       Object.keys(subTemplatesCode).forEach((name) => {
         if (subTemplatesCode[name].length) {
@@ -151,13 +152,10 @@ assign(MLTransformer.prototype, {
       } else if (needTemplate) {
         header.push(`$templates$ = $ownTemplates$;`);
       }
-      header.push(this.headerStatement);
+      header.push(HEADER);
       this.pushHeaderCode(2, 'return (');
       this.pushCode(2, ');');
       code.push('};');
-      if (needTemplate) {
-        code.push('module.exports.$ownTemplates$ = $ownTemplates$;');
-      }
       this.code = header.concat(code);
       done(null, this.code.join('\n'));
     }, {
@@ -264,7 +262,7 @@ assign(MLTransformer.prototype, {
     const {
       renderPath,
       attributeProcessor,
-      transformComponentName,
+      tagProcessor,
       allowScript,
       allowImportComponent,
     } = this.config;
@@ -291,7 +289,7 @@ assign(MLTransformer.prototype, {
       }
     }
 
-    const tag = content.type === 'tag' && content.name;
+    let tag = content.type === 'tag' && content.name;
     if (!tag) {
       return;
     }
@@ -303,7 +301,8 @@ assign(MLTransformer.prototype, {
         const deps = attrs.name && processImportComponent(attrs.name);
         let depCode = '';
         if (Array.isArray(deps)) {
-          depCode = `{ ${deps.map(d => `${d.name} ${d.as ? `as ${d.as}` : ''}, `)} }`;
+          depCode = deps.map(d => `${d.name}${d.as ? ` as ${d.as}` : ''}`).join(', ');
+          depCode = `{ ${depCode} }`;
         } else {
           depCode = deps;
         }
@@ -379,7 +378,7 @@ assign(MLTransformer.prototype, {
     }
 
     if (tag !== 'block') {
-      const transformedAttrs = {};
+      let transformedAttrs = {};
       if (forKey) {
         transformedAttrs.key = `{${forKey}}`;
       }
@@ -417,11 +416,24 @@ assign(MLTransformer.prototype, {
           transformedAttrs[attrKey] = transformedAttrValue;
         }
       });
+      if (tagProcessor) {
+        const tagProcessRet = tagProcessor({
+          attrs,
+          transformedAttrs,
+          tag,
+        });
+        if (tagProcessRet === false) {
+          return;
+        }
+        if (tagProcessRet) {
+          tag = tagProcessRet.tag || tag;
+          transformedAttrs = tagProcessRet.transformedAttrs || transformedAttrs;
+        }
+      }
       componentDeps[tag] = 1;
       const nextLevel = level + 2;
-      const transformedComponentName = transformComponentName && transformComponentName(tag) || tag;
       if (Object.keys(transformedAttrs).length) {
-        this.pushCode(level, `<${transformedComponentName}`);
+        this.pushCode(level, `<${tag}`);
         Object.keys(transformedAttrs).forEach((k) => {
           this.pushCode(nextLevel, `${startsWith(k, 'data-') ?
             k :
@@ -429,7 +441,7 @@ assign(MLTransformer.prototype, {
         });
         this.pushCode(level, `>`);
       } else {
-        this.pushCode(level, `<${transformedComponentName}>`);
+        this.pushCode(level, `<${tag}>`);
       }
 
       if (content.children) {
@@ -440,7 +452,7 @@ assign(MLTransformer.prototype, {
         this.popCodeSection();
       }
 
-      this.pushCode(level, `</${transformedComponentName}>`);
+      this.pushCode(level, `</${tag}>`);
     } else if (content.children) {
       // block will not emit any tag, so reuse current code section
       this.generateCodeForTags(content.children, level, true);

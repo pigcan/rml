@@ -3,8 +3,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const defaultValue = `
-<import-component name="{View}" from="react-native" />
+<import-component name="ReactNative" from="react-native" />
+<import-component name="{View, X:Y}" from="react-native" />
 <View>
+  <ReactNative.Text />
+  <Y />
   <div r:for="{{items}}" r:key="key" r:for-index="i">
       <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">
          {{item.value}} more than one at {{i}}
