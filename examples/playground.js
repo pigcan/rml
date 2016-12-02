@@ -23,7 +23,7 @@ webpackJsonp([0,1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var defaultValue = '\n<import-component name="{View}" from="react-native" />\n<View>\n  <div r:for="{{items}}" r:key="key" r:for-index="i">\n      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">\n         {{item.value}} more than one at {{i}}\n      </div>\n  </div>\n</View>\n';
+	var defaultValue = '\n<import-component name="ReactNative" from="react-native" />\n<import-component name="{View, X:Y}" from="react-native" />\n<View>\n  <ReactNative.Text />\n  <Y />\n  <div r:for="{{items}}" r:key="key" r:for-index="i">\n      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">\n         {{item.value}} more than one at {{i}}\n      </div>\n  </div>\n</View>\n';
 	
 	var Page = _react2.default.createClass({
 	  displayName: 'Page',
@@ -126,6 +126,7 @@ webpackJsonp([0,1],[
 	var utils = __webpack_require__(514);
 	var processImportComponent = __webpack_require__(516);
 	
+	var IMPORT = 'import';
 	var transformTemplateName = utils.transformTemplateName,
 	    camelCase = utils.camelCase,
 	    padding = utils.padding,
@@ -144,7 +145,7 @@ webpackJsonp([0,1],[
 	function MLTransformer(template, config_) {
 	  var config = config_ || {};
 	  this.config = config;
-	  this.headerStatement = config.header || 'module.exports = function render({ state }) {';
+	  this.headerStatement = config.header || 'export default function render({ state }) {';
 	  var _config$templateNames = config.templateNamespace,
 	      templateNamespace = _config$templateNames === undefined ? 'r' : _config$templateNames;
 	
@@ -163,7 +164,7 @@ webpackJsonp([0,1],[
 	  this.template = template;
 	  this.projectRoot = config.projectRoot || cwd;
 	  this.importComponent = config.importComponent || defaultImportComponent;
-	  this.header = ['const React = require(\'react\');'];
+	  this.header = ['import React from \'react\';'];
 	  this.subTemplatesCode = {};
 	  this.code = [];
 	  this.scope = [];
@@ -228,7 +229,7 @@ webpackJsonp([0,1],[
 	      }
 	
 	      if (Object.keys(importTplDeps).length) {
-	        header.push('const assign = require(\'object-assign\');');
+	        header.push('import assign from \'object-assign\';');
 	      }
 	      Object.keys(componentDeps).forEach(function (dep) {
 	        var importStatement = importComponent(dep);
@@ -239,17 +240,17 @@ webpackJsonp([0,1],[
 	      var subTemplatesName = [];
 	      Object.keys(importTplDeps).forEach(function (dep) {
 	        var index = importTplDeps[dep];
-	        header.push('const { $ownTemplates$: $ownTemplates$' + index + ' } ' + ('= ' + 'require' + '(\'' + transformTemplateName(dep) + '\');'));
+	        header.push(IMPORT + ' { $ownTemplates$: $ownTemplates$' + index + ' } ' + ('from \'' + transformTemplateName(dep) + '\';'));
 	        subTemplatesName.push('$ownTemplates$' + index);
 	      });
 	      Object.keys(includeTplDeps).forEach(function (dep) {
 	        var index = includeTplDeps[dep];
-	        header.push('const $render$' + index + ' = ' + 'require' + '(\'' + transformTemplateName(dep) + '\');');
+	        header.push(IMPORT + ' $render$' + index + ' from \'' + transformTemplateName(dep) + '\';');
 	      });
 	      var needTemplate = Object.keys(subTemplatesCode).length || Object.keys(importTplDeps).length;
 	      if (needTemplate) {
 	        header.push('let $templates$ = {};');
-	        header.push('const $ownTemplates$ = {};');
+	        header.push('export const $ownTemplates$ = {};');
 	      }
 	      Object.keys(subTemplatesCode).forEach(function (name) {
 	        if (subTemplatesCode[name].length) {
@@ -269,9 +270,6 @@ webpackJsonp([0,1],[
 	      _this.pushHeaderCode(2, 'return (');
 	      _this.pushCode(2, ');');
 	      code.push('};');
-	      if (needTemplate) {
-	        code.push('module.exports.$ownTemplates$ = $ownTemplates$;');
-	      }
 	      _this.code = header.concat(code);
 	      done(null, _this.code.join('\n'));
 	    }, {
@@ -429,9 +427,10 @@ webpackJsonp([0,1],[
 	        var deps = attrs.name && processImportComponent(attrs.name);
 	        var depCode = '';
 	        if (Array.isArray(deps)) {
-	          depCode = '{ ' + deps.map(function (d) {
-	            return d.name + ' ' + (d.as ? 'as ' + d.as : '') + ', ';
-	          }) + ' }';
+	          depCode = deps.map(function (d) {
+	            return '' + d.name + (d.as ? ' as ' + d.as : '');
+	          }).join(', ');
+	          depCode = '{ ' + depCode + ' }';
 	        } else {
 	          depCode = deps;
 	        }
@@ -46776,11 +46775,11 @@ webpackJsonp([0,1],[
 	        enter: function enter(path) {
 	          var node = path.node;
 	
-	          if (node.type === 'ObjectProperty') {
+	          if (node.type === 'ObjectProperty' && node.key && node.key.name) {
 	            var info = {
 	              name: node.key.name
 	            };
-	            if (node.value.name !== node.key.name) {
+	            if (node.value && node.value.name && node.value.name !== node.key.name) {
 	              info.as = node.value.name;
 	            }
 	            ret.push(info);
