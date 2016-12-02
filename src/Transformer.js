@@ -5,6 +5,8 @@ const htmlparser = require('htmlparser2');
 const DomHandler = require('domhandler');
 const transformExpression = require('./transformExpression');
 const utils = require('./utils');
+const processImportComponent = require('./processImportComponent');
+
 const {
   transformTemplateName,
   camelCase,
@@ -263,6 +265,8 @@ assign(MLTransformer.prototype, {
       renderPath,
       attributeProcessor,
       transformComponentName,
+      allowScript,
+      allowImportComponent,
     } = this.config;
 
     let level = level_ || 0;
@@ -278,12 +282,37 @@ assign(MLTransformer.prototype, {
       return;
     }
 
+    if (content.type === 'script' && allowScript) {
+      let { children } = content;
+      children = children && children[0];
+      const script = children && children.data;
+      if (script) {
+        this.header.push(script.trim());
+      }
+    }
+
     const tag = content.type === 'tag' && content.name;
     if (!tag) {
       return;
     }
 
     const attrs = content.attribs || {};
+
+    if (tag === 'import-component') {
+      if (allowImportComponent) {
+        const deps = attrs.name && processImportComponent(attrs.name);
+        let depCode = '';
+        if (Array.isArray(deps)) {
+          depCode = `{ ${deps.map(d => `${d.name} ${d.as ? `as ${d.as}` : ''}, `)} }`;
+        } else {
+          depCode = deps;
+        }
+        if (depCode) {
+          this.header.push(`import ${depCode} ${'from'} '${attrs.from}';`);
+        }
+      }
+      return;
+    }
 
     if (tag === 'template') {
       if (attrs.is) {

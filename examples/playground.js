@@ -3,13 +3,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const defaultValue = `
-<div>
+<import-component name="{View}" from="react-native" />
+<View>
   <div r:for="{{items}}" r:key="key" r:for-index="i">
       <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">
          {{item.value}} more than one at {{i}}
       </div>
   </div>
-</div>
+</View>
 `;
 
 const Page = React.createClass({
@@ -21,7 +22,9 @@ const Page = React.createClass({
 
   transformRml(rml) {
     let ret;
-    new Transformer(rml).transform((err, code) => {
+    new Transformer(rml, {
+      allowImportComponent: true,
+    }).transform((err, code) => {
       if (err) {
         alert(err);
       }
