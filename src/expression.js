@@ -56,7 +56,7 @@ function transformCode(code_, scope, config) {
           !findScope(scope, node.name)
         )
       ) {
-        node.name = `state.${node.name}`;
+        node.name = `data.${node.name}`;
       }
     },
   };

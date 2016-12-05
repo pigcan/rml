@@ -14,7 +14,7 @@ describe('block', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-        `export default function render({ state }) {`,
+        `export default function render(data) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -43,7 +43,7 @@ describe('block', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-        `export default function render({ state }) {`,
+        `export default function render(data) {`,
         `  return (`,
         `    <div>`,
         `      {`,
@@ -75,12 +75,12 @@ describe('block', () => {
       expect(code).to.eql([
         `import React from 'react';`,
 
-        `export default function render({ state }) {`,
+        `export default function render(data) {`,
         `  return (`,
         `    <div>`,
         `      {`,
         `      (`,
-        `      ((state.a > state.b)) ?`,
+        `      ((data.a > data.b)) ?`,
         `      (`,
         `      [`,
         `      <div>`,
@@ -110,16 +110,16 @@ describe('block', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-        `export default function render({ state }) {`,
+        `export default function render(data) {`,
         `  return (`,
         `    <div>`,
         `      {`,
         `      (`,
-        `      ((state.c > state.d)) ?`,
+        `      ((data.c > data.d)) ?`,
         `      (`,
         `      [`,
         `      (`,
-        `      ((state.a > state.b)) ?`,
+        `      ((data.a > data.b)) ?`,
         `      (`,
         `      <div>`,
         `      </div>`,
@@ -153,12 +153,12 @@ describe('block', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-        `export default function render({ state }) {`,
+        `export default function render(data) {`,
         `  return (`,
         `    <div>`,
         `      {`,
         `      (`,
-        `      ((state.a > state.b)) ?`,
+        `      ((data.a > data.b)) ?`,
         `      (`,
         `      [`,
         `      <div>`,
@@ -192,11 +192,11 @@ describe('block', () => {
       expect(code).to.eql([
         `import React from 'react';`,
 
-        `export default function render({ state }) {`,
+        `export default function render(data) {`,
         `  return (`,
         `    <div>`,
         `      {`,
-        `      ((state.a) || []).map((item, index) => {`,
+        `      ((data.a) || []).map((item, index) => {`,
         `        return (`,
         `          [`,
         `          <div>`,

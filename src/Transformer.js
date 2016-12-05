@@ -16,7 +16,7 @@ const {
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
 
-const HEADER = `export default function render({ state }) {`;
+const HEADER = `export default function render(data) {`;
 
 function defaultImportComponent() {
   return false;
@@ -138,7 +138,7 @@ assign(MLTransformer.prototype, {
       }
       Object.keys(subTemplatesCode).forEach((name) => {
         if (subTemplatesCode[name].length) {
-          header.push(`$ownTemplates$['${name}'] = function (state) {`);
+          header.push(`$ownTemplates$['${name}'] = function (data) {`);
           this.pushHeaderCode(2, 'return (');
           header = this.header = header.concat(subTemplatesCode[name]);
           this.pushHeaderCode(2, ');');

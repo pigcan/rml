@@ -1,7 +1,7 @@
 {
   "name": "rml",
   "description": "An alternate markup language to react jsx",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "keywords": [
     "react",
     "jsx"
@@ -19,7 +19,7 @@
     "babylon": "~6.11.4",
     "domhandler": "~2.3.0",
     "htmlparser2": "~3.9.2",
-    "object-assign": "~4.1.0"
+    "object-assign": "4.x"
   },
   "devDependencies": {
     "coveralls": "^2.11.15",
