@@ -100,7 +100,8 @@ webpackJsonp([0,1],[
 	'use strict';
 	
 	module.exports = {
-	  Transformer: __webpack_require__(4)
+	  Transformer: __webpack_require__(4),
+	  expression: __webpack_require__(130)
 	};
 
 /***/ },
@@ -122,7 +123,11 @@ webpackJsonp([0,1],[
 	var assign = __webpack_require__(78);
 	var htmlparser = __webpack_require__(79);
 	var DomHandler = __webpack_require__(89);
-	var transformExpression = __webpack_require__(130);
+	
+	var _require = __webpack_require__(130),
+	    transformExpression = _require.transformExpression,
+	    hasExpression = _require.hasExpression;
+	
 	var utils = __webpack_require__(514);
 	var processImportComponent = __webpack_require__(516);
 	
@@ -132,7 +137,6 @@ webpackJsonp([0,1],[
 	    startsWith = utils.startsWith,
 	    isNumber = utils.isNumber,
 	    transformAbsoluteToRelative = utils.transformAbsoluteToRelative;
-	var hasExpression = transformExpression.hasExpression;
 	
 	var cwd = process.cwd();
 	var TOP_LEVEL = 4;
@@ -162,8 +166,6 @@ webpackJsonp([0,1],[
 	  this.importTplDeps = {};
 	  this.includeTplDeps = {};
 	  this.template = template;
-	  this.projectRoot = config.projectRoot || cwd;
-	  this.importComponent = config.importComponent || defaultImportComponent;
 	  this.header = ['import React from \'react\';'];
 	  this.subTemplatesCode = {};
 	  this.code = [];
@@ -211,9 +213,10 @@ webpackJsonp([0,1],[
 	        importTplDeps = this.importTplDeps,
 	        componentDeps = this.componentDeps,
 	        subTemplatesCode = this.subTemplatesCode,
-	        includeTplDeps = this.includeTplDeps,
-	        importComponent = this.importComponent;
+	        includeTplDeps = this.includeTplDeps;
 	    var header = this.header;
+	    var _config$importCompone = this.config.importComponent,
+	        importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone;
 	
 	
 	    var handler = new DomHandler(function (error, children) {
@@ -382,13 +385,14 @@ webpackJsonp([0,1],[
 	    var importTplDeps = this.importTplDeps,
 	        subTemplatesCode = this.subTemplatesCode,
 	        componentDeps = this.componentDeps,
-	        includeTplDeps = this.includeTplDeps,
-	        projectRoot = this.projectRoot;
+	        includeTplDeps = this.includeTplDeps;
 	    var _config = this.config,
 	        renderPath = _config.renderPath,
 	        attributeProcessor = _config.attributeProcessor,
 	        tagProcessor = _config.tagProcessor,
 	        allowScript = _config.allowScript,
+	        _config$projectRoot = _config.projectRoot,
+	        projectRoot = _config$projectRoot === undefined ? cwd : _config$projectRoot,
 	        allowImportComponent = _config.allowImportComponent;
 	
 	
@@ -513,6 +517,7 @@ webpackJsonp([0,1],[
 	            attrKey: attrKey,
 	            tag: tag,
 	            attrs: attrs,
+	            transformedAttrs: transformedAttrs,
 	            transformer: _this3
 	          };
 	          if (attributeProcessor && attributeProcessor(info) === false) {
@@ -532,6 +537,7 @@ webpackJsonp([0,1],[
 	            transformedAttrs[attrKey] = transformedAttrValue;
 	          }
 	        });
+	        var originalTag = tag;
 	        if (tagProcessor) {
 	          var tagProcessRet = tagProcessor({
 	            attrs: attrs,
@@ -548,7 +554,7 @@ webpackJsonp([0,1],[
 	            transformedAttrs = tagProcessRet.transformedAttrs || transformedAttrs;
 	          }
 	        }
-	        componentDeps[tag] = 1;
+	        componentDeps[originalTag] = 1;
 	        var nextLevel = level + 2;
 	        if (Object.keys(transformedAttrs).length) {
 	          _this3.pushCode(level, '<' + tag);
@@ -12125,13 +12131,11 @@ webpackJsonp([0,1],[
 	  return transformExpressionByPart(str_, scope, config).join(' + ');
 	}
 	
-	transformExpression.hasExpression = function hasExpression(str) {
+	exports.transformExpression = transformExpression;
+	
+	exports.hasExpression = function hasExpression(str) {
 	  return str.match(expressionTagReg);
 	};
-	
-	transformExpression.transformExpressionByPart = transformExpressionByPart;
-	
-	module.exports = transformExpression;
 
 /***/ },
 /* 131 */
