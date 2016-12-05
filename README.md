@@ -1,7 +1,8 @@
 # rml
 ---
 
-An alternate markup language to react jsx. inspired by [wxml](https://mp.weixin.qq.com/debug/wxadoc/dev/framework/view/wxml).
+React Markup Language. An alternate markup language to react jsx.
+inspired by [wxml](https://mp.weixin.qq.com/debug/wxadoc/dev/framework/view/wxml).
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
@@ -104,6 +105,13 @@ include
 <div>
     <include src="./a.rml" /> <!-- embed-->
 </div>
+```
+
+import-component, need to activate allowImportComponent flag, defaults to false.
+
+```html
+<import-component name="{View, Text}" from="react-native" />
+<View><Text>Hello, rml</Text></View>
 ```
 
 ## Development
