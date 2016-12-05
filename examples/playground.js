@@ -141,7 +141,7 @@ webpackJsonp([0,1],[
 	var cwd = process.cwd();
 	var TOP_LEVEL = 4;
 	
-	var HEADER = 'export default function render({ state }) {';
+	var HEADER = 'export default function render(data) {';
 	
 	function defaultImportComponent() {
 	  return false;
@@ -257,7 +257,7 @@ webpackJsonp([0,1],[
 	      }
 	      Object.keys(subTemplatesCode).forEach(function (name) {
 	        if (subTemplatesCode[name].length) {
-	          header.push('$ownTemplates$[\'' + name + '\'] = function (state) {');
+	          header.push('$ownTemplates$[\'' + name + '\'] = function (data) {');
 	          _this.pushHeaderCode(2, 'return (');
 	          header = _this.header = header.concat(subTemplatesCode[name]);
 	          _this.pushHeaderCode(2, ');');
@@ -12071,7 +12071,7 @@ webpackJsonp([0,1],[
 	      }
 	      var type = parent && parent.type;
 	      if ((type !== 'MemberExpression' || parent.object === node || parent.property === node && parent.computed) && (type !== 'ObjectProperty' || parent.key !== node) && !findScope(scope, node.name)) {
-	        node.name = 'state.' + node.name;
+	        node.name = 'data.' + node.name;
 	      }
 	    }
 	  };
