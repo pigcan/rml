@@ -3,7 +3,7 @@
 const assign = require('object-assign');
 const htmlparser = require('htmlparser2');
 const DomHandler = require('domhandler');
-const transformExpression = require('./transformExpression');
+const { transformExpression, hasExpression } = require('./expression');
 const utils = require('./utils');
 const processImportComponent = require('./processImportComponent');
 
@@ -13,7 +13,6 @@ const {
   padding, startsWith,
   isNumber, transformAbsoluteToRelative,
 } = utils;
-const { hasExpression } = transformExpression;
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
 
@@ -47,8 +46,6 @@ function MLTransformer(template, config_) {
   this.importTplDeps = {};
   this.includeTplDeps = {};
   this.template = template;
-  this.projectRoot = config.projectRoot || cwd;
-  this.importComponent = config.importComponent || defaultImportComponent;
   this.header = [
     `import React from 'react';`,
   ];
@@ -95,9 +92,11 @@ assign(MLTransformer.prototype, {
     const {
       code, importTplDeps, componentDeps,
       subTemplatesCode, includeTplDeps,
-      importComponent,
     } = this;
     let { header } = this;
+    const {
+      importComponent = defaultImportComponent,
+    } = this.config;
 
     const handler = new DomHandler((error, children) => {
       if (error) {
@@ -256,7 +255,6 @@ assign(MLTransformer.prototype, {
     const {
       importTplDeps, subTemplatesCode,
       componentDeps, includeTplDeps,
-      projectRoot,
     } = this;
 
     const {
@@ -264,6 +262,7 @@ assign(MLTransformer.prototype, {
       attributeProcessor,
       tagProcessor,
       allowScript,
+      projectRoot = cwd,
       allowImportComponent,
     } = this.config;
 
@@ -397,6 +396,7 @@ assign(MLTransformer.prototype, {
           attrKey,
           tag,
           attrs,
+          transformedAttrs,
           transformer: this,
         };
         if (attributeProcessor && attributeProcessor(info) === false) {
@@ -416,6 +416,7 @@ assign(MLTransformer.prototype, {
           transformedAttrs[attrKey] = transformedAttrValue;
         }
       });
+      const originalTag = tag;
       if (tagProcessor) {
         const tagProcessRet = tagProcessor({
           attrs,
@@ -430,7 +431,7 @@ assign(MLTransformer.prototype, {
           transformedAttrs = tagProcessRet.transformedAttrs || transformedAttrs;
         }
       }
-      componentDeps[tag] = 1;
+      componentDeps[originalTag] = 1;
       const nextLevel = level + 2;
       if (Object.keys(transformedAttrs).length) {
         this.pushCode(level, `<${tag}`);

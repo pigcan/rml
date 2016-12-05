@@ -111,10 +111,8 @@ function transformExpression(str_, scope, config = {}) {
   return transformExpressionByPart(str_, scope, config).join(' + ');
 }
 
-transformExpression.hasExpression = function hasExpression(str) {
+exports.transformExpression = transformExpression;
+
+exports.hasExpression = function hasExpression(str) {
   return str.match(expressionTagReg);
 };
-
-transformExpression.transformExpressionByPart = transformExpressionByPart;
-
-module.exports = transformExpression;

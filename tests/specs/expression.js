@@ -1,7 +1,7 @@
 'use strict';
 
 const expect = require('expect.js');
-const transformExpression = require('../../src/transformExpression');
+const { transformExpression } = require('../../src/expression');
 
 describe('transformExpression', () => {
   it('keep this', () => {
