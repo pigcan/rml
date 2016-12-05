@@ -127,8 +127,7 @@ webpackJsonp([0,1],[
 	var processImportComponent = __webpack_require__(516);
 	
 	var IMPORT = 'import';
-	var transformTemplateName = utils.transformTemplateName,
-	    camelCase = utils.camelCase,
+	var camelCase = utils.camelCase,
 	    padding = utils.padding,
 	    startsWith = utils.startsWith,
 	    isNumber = utils.isNumber,
@@ -138,6 +137,8 @@ webpackJsonp([0,1],[
 	var cwd = process.cwd();
 	var TOP_LEVEL = 4;
 	
+	var HEADER = 'export default function render({ state }) {';
+	
 	function defaultImportComponent() {
 	  return false;
 	}
@@ -145,7 +146,6 @@ webpackJsonp([0,1],[
 	function MLTransformer(template, config_) {
 	  var config = config_ || {};
 	  this.config = config;
-	  this.headerStatement = config.header || 'export default function render({ state }) {';
 	  var _config$templateNames = config.templateNamespace,
 	      templateNamespace = _config$templateNames === undefined ? 'r' : _config$templateNames;
 	
@@ -240,12 +240,12 @@ webpackJsonp([0,1],[
 	      var subTemplatesName = [];
 	      Object.keys(importTplDeps).forEach(function (dep) {
 	        var index = importTplDeps[dep];
-	        header.push(IMPORT + ' { $ownTemplates$: $ownTemplates$' + index + ' } ' + ('from \'' + transformTemplateName(dep) + '\';'));
+	        header.push(IMPORT + ' { $ownTemplates$ as $ownTemplates$' + index + ' } ' + ('from \'' + dep + '\';'));
 	        subTemplatesName.push('$ownTemplates$' + index);
 	      });
 	      Object.keys(includeTplDeps).forEach(function (dep) {
 	        var index = includeTplDeps[dep];
-	        header.push(IMPORT + ' $render$' + index + ' from \'' + transformTemplateName(dep) + '\';');
+	        header.push(IMPORT + ' $render$' + index + ' from \'' + dep + '\';');
 	      });
 	      var needTemplate = Object.keys(subTemplatesCode).length || Object.keys(importTplDeps).length;
 	      if (needTemplate) {
@@ -266,7 +266,7 @@ webpackJsonp([0,1],[
 	      } else if (needTemplate) {
 	        header.push('$templates$ = $ownTemplates$;');
 	      }
-	      header.push(_this.headerStatement);
+	      header.push(HEADER);
 	      _this.pushHeaderCode(2, 'return (');
 	      _this.pushCode(2, ');');
 	      code.push('};');
@@ -387,7 +387,7 @@ webpackJsonp([0,1],[
 	    var _config = this.config,
 	        renderPath = _config.renderPath,
 	        attributeProcessor = _config.attributeProcessor,
-	        transformComponentName = _config.transformComponentName,
+	        tagProcessor = _config.tagProcessor,
 	        allowScript = _config.allowScript,
 	        allowImportComponent = _config.allowImportComponent;
 	
@@ -493,7 +493,7 @@ webpackJsonp([0,1],[
 	    }
 	
 	    if (tag !== 'block') {
-	      (function () {
+	      var _ret4 = function () {
 	        var transformedAttrs = {};
 	        if (forKey) {
 	          transformedAttrs.key = '{' + forKey + '}';
@@ -532,17 +532,32 @@ webpackJsonp([0,1],[
 	            transformedAttrs[attrKey] = transformedAttrValue;
 	          }
 	        });
+	        if (tagProcessor) {
+	          var tagProcessRet = tagProcessor({
+	            attrs: attrs,
+	            transformedAttrs: transformedAttrs,
+	            tag: tag
+	          });
+	          if (tagProcessRet === false) {
+	            return {
+	              v: void 0
+	            };
+	          }
+	          if (tagProcessRet) {
+	            tag = tagProcessRet.tag || tag;
+	            transformedAttrs = tagProcessRet.transformedAttrs || transformedAttrs;
+	          }
+	        }
 	        componentDeps[tag] = 1;
 	        var nextLevel = level + 2;
-	        var transformedComponentName = transformComponentName && transformComponentName(tag) || tag;
 	        if (Object.keys(transformedAttrs).length) {
-	          _this3.pushCode(level, '<' + transformedComponentName);
+	          _this3.pushCode(level, '<' + tag);
 	          Object.keys(transformedAttrs).forEach(function (k) {
 	            _this3.pushCode(nextLevel, '' + (startsWith(k, 'data-') ? k : camelCase(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
 	          });
 	          _this3.pushCode(level, '>');
 	        } else {
-	          _this3.pushCode(level, '<' + transformedComponentName + '>');
+	          _this3.pushCode(level, '<' + tag + '>');
 	        }
 	
 	        if (content.children) {
@@ -553,8 +568,10 @@ webpackJsonp([0,1],[
 	          _this3.popCodeSection();
 	        }
 	
-	        _this3.pushCode(level, '</' + transformedComponentName + '>');
-	      })();
+	        _this3.pushCode(level, '</' + tag + '>');
+	      }();
+	
+	      if ((typeof _ret4 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret4)) === "object") return _ret4.v;
 	    } else if (content.children) {
 	      // block will not emit any tag, so reuse current code section
 	      this.generateCodeForTags(content.children, level, true);
@@ -46467,27 +46484,6 @@ webpackJsonp([0,1],[
 	  });
 	}
 	
-	function transformStyleFileName(name) {
-	  var extname = path.extname(name);
-	  return name.replace(new RegExp('\\' + extname + '$'), '$Style');
-	}
-	
-	function toComponentName(str) {
-	  var ret = camelCase(str);
-	  return ret.charAt(0).toUpperCase() + ret.slice(1);
-	}
-	
-	var renderSuffix = '$Render';
-	
-	function transformTemplateName(name) {
-	  var extname = path.extname(name);
-	  return name.replace(new RegExp('\\' + extname + '$'), renderSuffix);
-	}
-	
-	function getTemplateRenderName(name) {
-	  return '' + name + renderSuffix;
-	}
-	
 	function transformAbsoluteToRelative(projectRoot, filepath, absolutePath) {
 	  var retPath = absolutePath;
 	  var firstChar = retPath.charAt(0);
@@ -46508,11 +46504,7 @@ webpackJsonp([0,1],[
 	  camelCase: camelCase,
 	  startsWith: startsWith,
 	  transformAbsoluteToRelative: transformAbsoluteToRelative,
-	  transformTemplateName: transformTemplateName,
-	  getTemplateRenderName: getTemplateRenderName,
-	  transformStyleFileName: transformStyleFileName,
 	  relative: relative,
-	  toComponentName: toComponentName,
 	  padding: padding,
 	  isNumber: isNumber
 	};
