@@ -250,6 +250,7 @@ webpackJsonp([0,1],[
 	        var index = includeTplDeps[dep];
 	        header.push(IMPORT + ' $render$' + index + ' from \'' + dep + '\';');
 	      });
+	      header.push(''); // empty line
 	      var needTemplate = Object.keys(subTemplatesCode).length || Object.keys(importTplDeps).length;
 	      if (needTemplate) {
 	        header.push('let $templates$ = {};');
