@@ -16,6 +16,7 @@ describe('MLTransformer', () => {
       ].join('\n')).transform((err, code) => {
         expect(code).to.eql([
           `import React from 'react';`,
+          ``,
           `let $templates$ = {};`,
           `export const $ownTemplates$ = {};`,
           `$ownTemplates$['t'] = function (data) {`,
@@ -52,6 +53,7 @@ describe('MLTransformer', () => {
           `import React from 'react';`,
           `import assign from 'object-assign';`,
           `import { $ownTemplates$ as $ownTemplates$1 } from './a.rml';`,
+          ``,
           `let $templates$ = {};`,
           `export const $ownTemplates$ = {};`,
           `$ownTemplates$['t'] = function (data) {`,
@@ -85,6 +87,7 @@ describe('MLTransformer', () => {
           `import React from 'react';`,
           `import assign from 'object-assign';`,
           `import { $ownTemplates$ as $ownTemplates$1 } from '../../a.rml';`,
+          ``,
           `let $templates$ = {};`,
           `export const $ownTemplates$ = {};`,
           `$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);`,
@@ -109,6 +112,7 @@ describe('MLTransformer', () => {
         expect(code).to.eql([
           `import React from 'react';`,
           `import $render$1 from './a.rml';`,
+          ``,
           `export default function render(data) {`,
           `  return (`,
           `    <div>`,

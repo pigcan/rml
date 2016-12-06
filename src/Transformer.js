@@ -130,6 +130,7 @@ assign(MLTransformer.prototype, {
         const index = includeTplDeps[dep];
         header.push(`${IMPORT} $render$${index} from '${dep}';`);
       });
+      header.push(''); // empty line
       const needTemplate = Object.keys(subTemplatesCode).length ||
         Object.keys(importTplDeps).length;
       if (needTemplate) {

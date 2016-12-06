@@ -20,6 +20,7 @@ describe('MLTransformer', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <div`,
@@ -51,7 +52,7 @@ describe('MLTransformer', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <div`,
@@ -72,6 +73,7 @@ describe('MLTransformer', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <div`,
@@ -97,6 +99,7 @@ describe('MLTransformer', () => {
         `import React from 'react';`,
         `import X from 'y';`,
         `import { Z, Q as Y } from 'y';`,
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <X>`,
@@ -122,6 +125,7 @@ describe('MLTransformer', () => {
       expect(code).to.eql([
         `import React from 'react';`,
         `var x = 1;`,
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <X>`,

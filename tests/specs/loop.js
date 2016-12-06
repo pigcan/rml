@@ -15,6 +15,7 @@ describe('loop', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <div>`,
@@ -50,7 +51,7 @@ describe('loop', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <div>`,
@@ -90,7 +91,7 @@ describe('loop', () => {
     ].join('\n')).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
-
+        ``,
         `export default function render(data) {`,
         `  return (`,
         `    <div>`,
