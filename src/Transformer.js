@@ -51,8 +51,10 @@ function MLTransformer(template, config_) {
   ];
   this.subTemplatesCode = {};
   this.code = [];
-  this.scope = [];
   this.state = [];
+  // caused by import-component
+  this.rootScope = {};
+  this.scope = [this.rootScope];
   this.importIncludeIndex = 1;
   this.codeDepth = [0];
 }
@@ -76,7 +78,7 @@ assign(MLTransformer.prototype, {
       scope: this.scope,
     });
     this.code = [];
-    this.scope = [];
+    this.scope = [this.rootScope];
   },
   popState() {
     const state = {
@@ -301,10 +303,15 @@ assign(MLTransformer.prototype, {
         const deps = attrs.name && processImportComponent(attrs.name);
         let depCode = '';
         if (Array.isArray(deps)) {
-          depCode = deps.map(d => `${d.name}${d.as ? ` as ${d.as}` : ''}`).join(', ');
+          depCode = deps.map(d => {
+            const variableName = d.as ? d.as : d.name;
+            this.rootScope[variableName] = 1;
+            return `${d.name}${d.as ? ` as ${d.as}` : ''}`;
+          }).join(', ');
           depCode = `{ ${depCode} }`;
         } else {
           depCode = deps;
+          this.rootScope[deps] = 1;
         }
         if (depCode) {
           this.header.push(`import ${depCode} ${'from'} '${attrs.from}';`);
@@ -463,7 +470,9 @@ assign(MLTransformer.prototype, {
     if (inFor) {
       level -= 2;
       this.pushCode(level, ');');
-      this.scope.pop();
+      if (this.scope.length > 1) {
+        this.scope.pop();
+      }
       level -= 2;
       this.pushCode(level, '})');
       if (this.isEndOfCodeSection()) {

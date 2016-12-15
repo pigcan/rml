@@ -91,7 +91,7 @@ describe('MLTransformer', () => {
     new MLTransformer([
       `<import-component name="X" from="y" />`,
       `<import-component name="{Z, Q:Y}" from="y" />`,
-      `<X><Y/><Z/></X>`,
+      `<X value="{{Y}}"><Y/><Z/></X>`,
     ].join('\n'), {
       allowImportComponent: true,
     }).transform((err, code) => {
@@ -102,7 +102,9 @@ describe('MLTransformer', () => {
         ``,
         `export default function render(data) {`,
         `  return (`,
-        `    <X>`,
+        `    <X`,
+        `      value = {(Y)}`,
+        `    >`,
         `      <Y>`,
         `      </Y>`,
         `      <Z>`,
