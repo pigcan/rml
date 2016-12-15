@@ -169,8 +169,10 @@ webpackJsonp([0,1],[
 	  this.header = ['import React from \'react\';'];
 	  this.subTemplatesCode = {};
 	  this.code = [];
-	  this.scope = [];
 	  this.state = [];
+	  // caused by import-component
+	  this.rootScope = {};
+	  this.scope = [this.rootScope];
 	  this.importIncludeIndex = 1;
 	  this.codeDepth = [0];
 	}
@@ -194,7 +196,7 @@ webpackJsonp([0,1],[
 	      scope: this.scope
 	    });
 	    this.code = [];
-	    this.scope = [];
+	    this.scope = [this.rootScope];
 	  },
 	  popState: function popState() {
 	    var state = {
@@ -433,11 +435,14 @@ webpackJsonp([0,1],[
 	        var depCode = '';
 	        if (Array.isArray(deps)) {
 	          depCode = deps.map(function (d) {
+	            var variableName = d.as ? d.as : d.name;
+	            _this3.rootScope[variableName] = 1;
 	            return '' + d.name + (d.as ? ' as ' + d.as : '');
 	          }).join(', ');
 	          depCode = '{ ' + depCode + ' }';
 	        } else {
 	          depCode = deps;
+	          this.rootScope[deps] = 1;
 	        }
 	        if (depCode) {
 	          this.header.push('import ' + depCode + ' ' + 'from' + ' \'' + attrs.from + '\';');
@@ -587,7 +592,9 @@ webpackJsonp([0,1],[
 	    if (inFor) {
 	      level -= 2;
 	      this.pushCode(level, ');');
-	      this.scope.pop();
+	      if (this.scope.length > 1) {
+	        this.scope.pop();
+	      }
 	      level -= 2;
 	      this.pushCode(level, '})');
 	      if (this.isEndOfCodeSection()) {
