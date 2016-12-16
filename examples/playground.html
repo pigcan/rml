@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>playground.js - example - rml@0.3.3</title>
+  <title>playground.js - example - rml@0.4.0</title>
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta charset="utf-8"/>
@@ -263,7 +263,7 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 <body>
   <div class="container">
     <div class="header">
-      <h1>rml@0.3.3</h1>
+      <h1>rml@0.4.0</h1>
 
       <p>An alternate markup language to react jsx</p>
     </div>
@@ -274,8 +274,8 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
 
 <span class="hljs-keyword">const</span> defaultValue = <span class="hljs-string">`
-&lt;import-component name="ReactNative" from="react-native" /&gt;
-&lt;import-component name="{View, X:Y}" from="react-native" /&gt;
+&lt;import-module name="ReactNative" from="react-native" /&gt;
+&lt;import-module name="{View, X:Y}" from="react-native" /&gt;
 &lt;View&gt;
   &lt;ReactNative.Text /&gt;
   &lt;Y /&gt;
@@ -297,7 +297,7 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
   transformRml(rml) {
     <span class="hljs-keyword">let</span> ret;
     <span class="hljs-keyword">new</span> Transformer(rml, {
-      allowImportComponent: <span class="hljs-literal">true</span>,
+      allowImportModule: <span class="hljs-literal">true</span>,
     }).transform((err, code) =&gt; {
       <span class="hljs-keyword">if</span> (err) {
         alert(err);

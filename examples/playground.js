@@ -23,7 +23,7 @@ webpackJsonp([0,1],[
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var defaultValue = '\n<import-component name="ReactNative" from="react-native" />\n<import-component name="{View, X:Y}" from="react-native" />\n<View>\n  <ReactNative.Text />\n  <Y />\n  <div r:for="{{items}}" r:key="key" r:for-index="i">\n      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">\n         {{item.value}} more than one at {{i}}\n      </div>\n  </div>\n</View>\n';
+	var defaultValue = '\n<import-module name="ReactNative" from="react-native" />\n<import-module name="{View, X:Y}" from="react-native" />\n<View>\n  <ReactNative.Text />\n  <Y />\n  <div r:for="{{items}}" r:key="key" r:for-index="i">\n      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">\n         {{item.value}} more than one at {{i}}\n      </div>\n  </div>\n</View>\n';
 	
 	var Page = _react2.default.createClass({
 	  displayName: 'Page',
@@ -35,7 +35,7 @@ webpackJsonp([0,1],[
 	  transformRml: function transformRml(rml) {
 	    var ret = void 0;
 	    new _rml.Transformer(rml, {
-	      allowImportComponent: true
+	      allowImportModule: true
 	    }).transform(function (err, code) {
 	      if (err) {
 	        alert(err);
@@ -170,7 +170,7 @@ webpackJsonp([0,1],[
 	  this.subTemplatesCode = {};
 	  this.code = [];
 	  this.state = [];
-	  // caused by import-component
+	  // caused by import-module
 	  this.rootScope = {};
 	  this.scope = [this.rootScope];
 	  this.importIncludeIndex = 1;
@@ -396,7 +396,7 @@ webpackJsonp([0,1],[
 	        allowScript = _config.allowScript,
 	        _config$projectRoot = _config.projectRoot,
 	        projectRoot = _config$projectRoot === undefined ? cwd : _config$projectRoot,
-	        allowImportComponent = _config.allowImportComponent;
+	        allowImportModule = _config.allowImportModule;
 	
 	
 	    var level = level_ || 0;
@@ -429,8 +429,8 @@ webpackJsonp([0,1],[
 	
 	    var attrs = content.attribs || {};
 	
-	    if (tag === 'import-component') {
-	      if (allowImportComponent) {
+	    if (tag === 'import-module') {
+	      if (allowImportModule) {
 	        var deps = attrs.name && processImportComponent(attrs.name);
 	        var depCode = '';
 	        if (Array.isArray(deps)) {
