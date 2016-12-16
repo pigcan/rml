@@ -93,7 +93,7 @@ describe('MLTransformer', () => {
       `<import-module name="{Z, Q:Y}" from="y" />`,
       `<X value="{{Y}}"><Y/><Z/></X>`,
     ].join('\n'), {
-      allowImportComponent: true,
+      allowImportModule: true,
     }).transform((err, code) => {
       expect(code).to.eql([
         `import React from 'react';`,
