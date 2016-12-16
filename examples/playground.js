@@ -3,8 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const defaultValue = `
-<import-component name="ReactNative" from="react-native" />
-<import-component name="{View, X:Y}" from="react-native" />
+<import-module name="ReactNative" from="react-native" />
+<import-module name="{View, X:Y}" from="react-native" />
 <View>
   <ReactNative.Text />
   <Y />
@@ -26,7 +26,7 @@ const Page = React.createClass({
   transformRml(rml) {
     let ret;
     new Transformer(rml, {
-      allowImportComponent: true,
+      allowImportModule: true,
     }).transform((err, code) => {
       if (err) {
         alert(err);

@@ -89,8 +89,8 @@ describe('MLTransformer', () => {
 
   it('allowImportComponent', (done) => {
     new MLTransformer([
-      `<import-component name="X" from="y" />`,
-      `<import-component name="{Z, Q:Y}" from="y" />`,
+      `<import-module name="X" from="y" />`,
+      `<import-module name="{Z, Q:Y}" from="y" />`,
       `<X value="{{Y}}"><Y/><Z/></X>`,
     ].join('\n'), {
       allowImportComponent: true,

@@ -107,10 +107,10 @@ include
 </div>
 ```
 
-import-component, need to activate allowImportComponent flag, defaults to false.
+import-module, need to activate allowImportModule flag, defaults to false.
 
 ```html
-<import-component name="{View, Text}" from="react-native" />
+<import-module name="{View, Text}" from="react-native" />
 <View><Text>Hello, rml</Text></View>
 ```
 

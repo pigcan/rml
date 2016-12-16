@@ -52,7 +52,7 @@ function MLTransformer(template, config_) {
   this.subTemplatesCode = {};
   this.code = [];
   this.state = [];
-  // caused by import-component
+  // caused by import-module
   this.rootScope = {};
   this.scope = [this.rootScope];
   this.importIncludeIndex = 1;
@@ -266,7 +266,7 @@ assign(MLTransformer.prototype, {
       tagProcessor,
       allowScript,
       projectRoot = cwd,
-      allowImportComponent,
+      allowImportModule,
     } = this.config;
 
     let level = level_ || 0;
@@ -298,8 +298,8 @@ assign(MLTransformer.prototype, {
 
     const attrs = content.attribs || {};
 
-    if (tag === 'import-component') {
-      if (allowImportComponent) {
+    if (tag === 'import-module') {
+      if (allowImportModule) {
         const deps = attrs.name && processImportComponent(attrs.name);
         let depCode = '';
         if (Array.isArray(deps)) {
