@@ -30,6 +30,10 @@ function findScope(scope, name) {
   return false;
 }
 
+function escapeString(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
 function transformCode(code_, scope, config) {
   const visitor = {
     noScope: 1,
@@ -82,7 +86,7 @@ function transformExpressionByPart(str_, scope, config) {
   }
   const str = str_.trim();
   if (!str.match(expressionTagReg)) {
-    return [isNumber(str) ? str : `'${str_}'`];
+    return [isNumber(str) ? str : `'${escapeString(str_)}'`];
   }
   let match = str.match(fullExpressionTagReg);
   if (match) {
@@ -95,14 +99,14 @@ function transformExpressionByPart(str_, scope, config) {
   while ((match = expressionTagReg.exec(str))) {
     const code = match[1];
     if (match.index !== lastIndex) {
-      gen.push(`'${str.slice(lastIndex, match.index)}'`);
+      gen.push(`'${escapeString(str.slice(lastIndex, match.index))}'`);
     }
     gen.push(transformCode(code, scope, config));
     lastIndex = expressionTagReg.lastIndex;
   }
 
   if (lastIndex < totalLength) {
-    gen.push(`'${str.slice(lastIndex)}'`);
+    gen.push(`'${escapeString(str.slice(lastIndex))}'`);
   }
   return gen;
 }

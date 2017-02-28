@@ -22,6 +22,26 @@ function defaultImportComponent() {
   return false;
 }
 
+function isTopLevel(level) {
+  return level === 4;
+}
+
+function countValidChildren(children = []) {
+  return children.reduce((count, c) => {
+    if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
+      return count;
+    }
+    const tag = c.type === 'tag' && c.name;
+    if (tag) {
+      const attrs = c.attribs || {};
+      if (tag === 'import-module' || tag === 'template' && !attrs.is || tag === 'import') {
+        return count;
+      }
+    }
+    return count + 1;
+  }, 0);
+}
+
 function MLTransformer(template, config_) {
   const config = config_ || {};
   this.config = config;
@@ -106,7 +126,7 @@ assign(MLTransformer.prototype, {
         return;
       }
       // console.log(util.inspect(children, false, null));
-      this.generateCodeForTags(children, TOP_LEVEL, false);
+      this.generateCodeForTags(children, TOP_LEVEL);
 
       if (!code.length) {
         code.push('null');
@@ -178,7 +198,8 @@ assign(MLTransformer.prototype, {
     this.header.push(padding(level, str));
   },
 
-  generateCodeForTags(children_, level, arrayForm) {
+  generateCodeForTags(children_, level, arrayForm_) {
+    const arrayForm = arrayForm_ === undefined ? countValidChildren(children_) > 1 : arrayForm_;
     let children = children_;
     if (children) {
       let i = 0;
@@ -189,7 +210,7 @@ assign(MLTransformer.prototype, {
         const attrs = c.attribs;
         if (attrs && name in attrs) {
           const ifValue = attrs[name];
-          if (name === this.IF_ATTR_NAME && this.isStartOfCodeSection()) {
+          if (!isTopLevel(level) && name === this.IF_ATTR_NAME && this.isStartOfCodeSection()) {
             this.pushCode(level, '{');
           }
           let ifExp;
@@ -222,7 +243,7 @@ assign(MLTransformer.prototype, {
             this.pushCode(level, 'null');
           }
           this.pushCode(level, ')');
-          if (name === this.IF_ATTR_NAME && this.isEndOfCodeSection()) {
+          if (!isTopLevel(level) && name === this.IF_ATTR_NAME && this.isEndOfCodeSection()) {
             this.pushCode(level, '}');
           }
           return true;
@@ -231,7 +252,8 @@ assign(MLTransformer.prototype, {
       };
 
       if (arrayForm) {
-        if (this.isStartOfCodeSection()) {
+        const isStartOfCodeSection = this.isStartOfCodeSection();
+        if (!isTopLevel(level) && isStartOfCodeSection) {
           this.pushCode(level, '{');
         }
         this.pushCode(level, '[');
@@ -240,14 +262,15 @@ assign(MLTransformer.prototype, {
         const child = children[i];
         if (!transformIf(child, this.IF_ATTR_NAME)) {
           this.generateCodeForTag(child, level);
-          if (arrayForm) {
-            this.pushCode(level, ',');
-          }
+        }
+        if (arrayForm) {
+          this.pushCode(level, ',');
         }
       }
       if (arrayForm) {
         this.pushCode(level, ']');
-        if (this.isEndOfCodeSection()) {
+        const isEndOfCodeSection = this.isEndOfCodeSection();
+        if (!isTopLevel(level) && isEndOfCodeSection) {
           this.pushCode(level, '}');
         }
       }
@@ -270,13 +293,15 @@ assign(MLTransformer.prototype, {
     } = this.config;
 
     let level = level_ || 0;
-
     if (content.type === 'text') {
       let text = content.data.trim();
-      if (text && hasExpression(text)) {
-        text = `{${transformExpression(text, this.scope)}}`;
-      }
       if (text) {
+        const isStartOfCodeSection = this.isStartOfCodeSection();
+        const isEndOfCodeSection = this.isEndOfCodeSection();
+        text = `${isTopLevel(level) || !isStartOfCodeSection ?
+          '' : '{'}${transformExpression(text, this.scope)}${
+          isTopLevel(level) || !isEndOfCodeSection ?
+            '' : '}'}`;
         this.pushCode(level, text);
       }
       return;
@@ -323,7 +348,7 @@ assign(MLTransformer.prototype, {
     if (tag === 'template') {
       if (attrs.is) {
         const data = attrs.data ?
-        transformExpression(attrs.data, this.scope, { forceObject: true }) || 'undefined' :
+          transformExpression(attrs.data, this.scope, { forceObject: true }) || 'undefined' :
           'undefined';
         const is = transformExpression(attrs.is, this.scope);
         this.pushCode(level,
@@ -335,7 +360,7 @@ assign(MLTransformer.prototype, {
       } else {
         this.pushState();
         const { name } = attrs;
-        this.generateCodeForTags(content.children, TOP_LEVEL, false);
+        this.generateCodeForTags(content.children, TOP_LEVEL);
         subTemplatesCode[name] = this.popState().code;
       }
       return;
@@ -364,7 +389,8 @@ assign(MLTransformer.prototype, {
     let forKey;
     if (this.FOR_ATTR_NAME in attrs) {
       inFor = true;
-      if (this.isStartOfCodeSection()) {
+      const isStartOfCodeSection = this.isStartOfCodeSection();
+      if (isStartOfCodeSection && !isTopLevel(level)) {
         this.pushCode(level, '{');
       }
       const forExp = transformExpression(attrs[this.FOR_ATTR_NAME], this.scope);
@@ -457,14 +483,14 @@ assign(MLTransformer.prototype, {
         // new code section start
         // <view>{}</view>
         this.pushCodeSection();
-        this.generateCodeForTags(content.children, nextLevel);
+        this.generateCodeForTags(content.children, nextLevel, false);
         this.popCodeSection();
       }
 
       this.pushCode(level, `</${tag}>`);
     } else if (content.children) {
       // block will not emit any tag, so reuse current code section
-      this.generateCodeForTags(content.children, level, true);
+      this.generateCodeForTags(content.children, level);
     }
 
     if (inFor) {
@@ -475,12 +501,14 @@ assign(MLTransformer.prototype, {
       }
       level -= 2;
       this.pushCode(level, '})');
-      if (this.isEndOfCodeSection()) {
+      const isEndOfCodeSection = this.isEndOfCodeSection();
+      if (isEndOfCodeSection && !isTopLevel(level)) {
         this.pushCode(level, '}');
       }
     }
   },
-});
+})
+;
 
 
 module.exports = MLTransformer;

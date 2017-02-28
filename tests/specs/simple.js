@@ -32,10 +32,10 @@ describe('MLTransformer', () => {
         `        {'1' + (data.a[0].b) + '2'}`,
         `      </div>`,
         `      <div>`,
-        `        1`,
+        `        {1}`,
         `      </div>`,
         `      <div>`,
-        `        1`,
+        `        {1}`,
         `      </div>`,
         `    </div>`,
         `  );`,
@@ -87,7 +87,7 @@ describe('MLTransformer', () => {
     });
   });
 
-  it('allowImportComponent', (done) => {
+  it('allowImportModule', (done) => {
     new MLTransformer([
       `<import-module name="X" from="y" />`,
       `<import-module name="{Z, Q:Y}" from="y" />`,

@@ -18,19 +18,66 @@ describe('block', () => {
         `export default function render(data) {`,
         `  return (`,
         `    <div>`,
-        `      {`,
-        `      [`,
         `      <div>`,
         `      </div>`,
-        `      ,`,
-        `      ]`,
-        `      }`,
         `    </div>`,
         `  );`,
         `};`,
       ].join('\n'));
       done();
     });
+  });
+
+  it('support text', (done) => {
+    new MLTransformer([
+      `<block>`,
+      `{{x}}`,
+      `</block>`,
+    ].join('\n')).transform((err, code) => {
+      expect(code).to.eql([`
+import React from 'react';`,
+        ``,
+        `
+export default function render(data) {
+  return (
+    (data.x)
+  );
+};
+`.trim()].join('\n').trim());
+      done();
+    });
+  });
+
+
+  it('support nested block', (done) => {
+    new MLTransformer(`
+      <view r:if="{{z}}">
+        <block>
+          {{ z }}
+        </block>
+      </view>
+`.trim())
+      .transform((err, code) => {
+        expect(code).to.eql(`
+import React from 'react';
+
+export default function render(data) {
+  return (
+    (
+    ((data.z)) ?
+    (
+    <view>
+      {(data.z)}
+    </view>
+    )
+    :
+    null
+    )
+  );
+};
+`.trim());
+        done();
+      });
   });
 
   it('support simple multiple', (done) => {
@@ -84,11 +131,8 @@ describe('block', () => {
         `      (`,
         `      ((data.a > data.b)) ?`,
         `      (`,
-        `      [`,
         `      <div>`,
         `      </div>`,
-        `      ,`,
-        `      ]`,
         `      )`,
         `      :`,
         `      null`,
@@ -120,7 +164,6 @@ describe('block', () => {
         `      (`,
         `      ((data.c > data.d)) ?`,
         `      (`,
-        `      [`,
         `      (`,
         `      ((data.a > data.b)) ?`,
         `      (`,
@@ -130,7 +173,6 @@ describe('block', () => {
         `      :`,
         `      null`,
         `      )`,
-        `      ]`,
         `      )`,
         `      :`,
         `      null`,
@@ -202,11 +244,8 @@ describe('block', () => {
         `      {`,
         `      ((data.a) || []).map((item, index) => {`,
         `        return (`,
-        `          [`,
         `          <div>`,
         `          </div>`,
-        `          ,`,
-        `          ]`,
         `        );`,
         `      })`,
         `      }`,
@@ -216,5 +255,29 @@ describe('block', () => {
       ].join('\n'));
       done();
     });
+  });
+
+  it('support root block for', (done) => {
+    new MLTransformer(`
+<block r:for="{{z}}">
+          z'\\
+        </block>
+`.trim())
+      .transform((err, code) => {
+        expect(code).to.eql(`
+import React from 'react';
+
+export default function render(data) {
+  return (
+    ((data.z) || []).map((item, index) => {
+      return (
+        'z\\\'\\\\'
+      );
+    })
+  );
+};
+`.trim());
+        done();
+      });
   });
 });

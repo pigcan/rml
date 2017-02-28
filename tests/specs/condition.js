@@ -179,7 +179,7 @@ describe('conditional render', () => {
     });
   });
 
-  it('support empy else', (done) => {
+  it('support empty else', (done) => {
     new MLTransformer([
       '<div>',
       '<div r:if="{{l>1}}">',
@@ -216,5 +216,37 @@ describe('conditional render', () => {
       ].join('\n'));
       done();
     });
+  });
+
+  it('support multiple roots', (done) => {
+    new MLTransformer(`
+<block r:if="a">1</block>
+<view/>
+`.trim())
+      .transform((err, code) => {
+        expect(code).to.eql(`
+      import React from 'react';
+
+export default function render(data) {
+  return (
+    [
+    (
+    ('a') ?
+    (
+    1
+    )
+    :
+    null
+    )
+    ,
+    <view>
+    </view>
+    ,
+    ]
+  );
+};
+`.trim());
+        done();
+      });
   });
 });
