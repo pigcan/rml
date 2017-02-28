@@ -147,6 +147,28 @@ webpackJsonp([0,1],[
 	  return false;
 	}
 	
+	function isTopLevel(level) {
+	  return level === 4;
+	}
+	
+	function countValidChildren() {
+	  var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	
+	  return children.reduce(function (count, c) {
+	    if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
+	      return count;
+	    }
+	    var tag = c.type === 'tag' && c.name;
+	    if (tag) {
+	      var attrs = c.attribs || {};
+	      if (tag === 'import-module' || tag === 'template' && !attrs.is || tag === 'import') {
+	        return count;
+	      }
+	    }
+	    return count + 1;
+	  }, 0);
+	}
+	
 	function MLTransformer(template, config_) {
 	  var config = config_ || {};
 	  this.config = config;
@@ -227,7 +249,7 @@ webpackJsonp([0,1],[
 	        return;
 	      }
 	      // console.log(util.inspect(children, false, null));
-	      _this.generateCodeForTags(children, TOP_LEVEL, false);
+	      _this.generateCodeForTags(children, TOP_LEVEL);
 	
 	      if (!code.length) {
 	        code.push('null');
@@ -293,9 +315,10 @@ webpackJsonp([0,1],[
 	  pushHeaderCode: function pushHeaderCode(level, str) {
 	    this.header.push(padding(level, str));
 	  },
-	  generateCodeForTags: function generateCodeForTags(children_, level, arrayForm) {
+	  generateCodeForTags: function generateCodeForTags(children_, level, arrayForm_) {
 	    var _this2 = this;
 	
+	    var arrayForm = arrayForm_ === undefined ? countValidChildren(children_) > 1 : arrayForm_;
 	    var children = children_;
 	    if (children) {
 	      (function () {
@@ -310,7 +333,7 @@ webpackJsonp([0,1],[
 	          if (attrs && name in attrs) {
 	            var _ret2 = function () {
 	              var ifValue = attrs[name];
-	              if (name === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection()) {
+	              if (!isTopLevel(level) && name === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection()) {
 	                _this2.pushCode(level, '{');
 	              }
 	              var ifExp = void 0;
@@ -345,7 +368,7 @@ webpackJsonp([0,1],[
 	                _this2.pushCode(level, 'null');
 	              }
 	              _this2.pushCode(level, ')');
-	              if (name === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection()) {
+	              if (!isTopLevel(level) && name === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection()) {
 	                _this2.pushCode(level, '}');
 	              }
 	              return {
@@ -359,7 +382,8 @@ webpackJsonp([0,1],[
 	        };
 	
 	        if (arrayForm) {
-	          if (_this2.isStartOfCodeSection()) {
+	          var isStartOfCodeSection = _this2.isStartOfCodeSection();
+	          if (!isTopLevel(level) && isStartOfCodeSection) {
 	            _this2.pushCode(level, '{');
 	          }
 	          _this2.pushCode(level, '[');
@@ -368,14 +392,15 @@ webpackJsonp([0,1],[
 	          var child = children[i];
 	          if (!transformIf(child, _this2.IF_ATTR_NAME)) {
 	            _this2.generateCodeForTag(child, level);
-	            if (arrayForm) {
-	              _this2.pushCode(level, ',');
-	            }
+	          }
+	          if (arrayForm) {
+	            _this2.pushCode(level, ',');
 	          }
 	        }
 	        if (arrayForm) {
 	          _this2.pushCode(level, ']');
-	          if (_this2.isEndOfCodeSection()) {
+	          var isEndOfCodeSection = _this2.isEndOfCodeSection();
+	          if (!isTopLevel(level) && isEndOfCodeSection) {
 	            _this2.pushCode(level, '}');
 	          }
 	        }
@@ -400,13 +425,12 @@ webpackJsonp([0,1],[
 	
 	
 	    var level = level_ || 0;
-	
 	    if (content.type === 'text') {
 	      var text = content.data.trim();
-	      if (text && hasExpression(text)) {
-	        text = '{' + transformExpression(text, this.scope) + '}';
-	      }
 	      if (text) {
+	        var isStartOfCodeSection = this.isStartOfCodeSection();
+	        var isEndOfCodeSection = this.isEndOfCodeSection();
+	        text = '' + (isTopLevel(level) || !isStartOfCodeSection ? '' : '{') + transformExpression(text, this.scope) + (isTopLevel(level) || !isEndOfCodeSection ? '' : '}');
 	        this.pushCode(level, text);
 	      }
 	      return;
@@ -460,7 +484,7 @@ webpackJsonp([0,1],[
 	        this.pushState();
 	        var name = attrs.name;
 	
-	        this.generateCodeForTags(content.children, TOP_LEVEL, false);
+	        this.generateCodeForTags(content.children, TOP_LEVEL);
 	        subTemplatesCode[name] = this.popState().code;
 	      }
 	      return;
@@ -485,7 +509,8 @@ webpackJsonp([0,1],[
 	      var _scope$push;
 	
 	      inFor = true;
-	      if (this.isStartOfCodeSection()) {
+	      var _isStartOfCodeSection = this.isStartOfCodeSection();
+	      if (_isStartOfCodeSection && !isTopLevel(level)) {
 	        this.pushCode(level, '{');
 	      }
 	      var forExp = transformExpression(attrs[this.FOR_ATTR_NAME], this.scope);
@@ -576,7 +601,7 @@ webpackJsonp([0,1],[
 	          // new code section start
 	          // <view>{}</view>
 	          _this3.pushCodeSection();
-	          _this3.generateCodeForTags(content.children, nextLevel);
+	          _this3.generateCodeForTags(content.children, nextLevel, false);
 	          _this3.popCodeSection();
 	        }
 	
@@ -586,7 +611,7 @@ webpackJsonp([0,1],[
 	      if ((typeof _ret4 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret4)) === "object") return _ret4.v;
 	    } else if (content.children) {
 	      // block will not emit any tag, so reuse current code section
-	      this.generateCodeForTags(content.children, level, true);
+	      this.generateCodeForTags(content.children, level);
 	    }
 	
 	    if (inFor) {
@@ -597,7 +622,8 @@ webpackJsonp([0,1],[
 	      }
 	      level -= 2;
 	      this.pushCode(level, '})');
-	      if (this.isEndOfCodeSection()) {
+	      var _isEndOfCodeSection = this.isEndOfCodeSection();
+	      if (_isEndOfCodeSection && !isTopLevel(level)) {
 	        this.pushCode(level, '}');
 	      }
 	    }
@@ -12067,6 +12093,10 @@ webpackJsonp([0,1],[
 	  return false;
 	}
 	
+	function escapeString(str) {
+	  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+	}
+	
 	function transformCode(code_, scope, config) {
 	  var visitor = {
 	    noScope: 1,
@@ -12108,7 +12138,7 @@ webpackJsonp([0,1],[
 	  }
 	  var str = str_.trim();
 	  if (!str.match(expressionTagReg)) {
-	    return [isNumber(str) ? str : '\'' + str_ + '\''];
+	    return [isNumber(str) ? str : '\'' + escapeString(str_) + '\''];
 	  }
 	  var match = str.match(fullExpressionTagReg);
 	  if (match) {
@@ -12121,14 +12151,14 @@ webpackJsonp([0,1],[
 	  while (match = expressionTagReg.exec(str)) {
 	    var code = match[1];
 	    if (match.index !== lastIndex) {
-	      gen.push('\'' + str.slice(lastIndex, match.index) + '\'');
+	      gen.push('\'' + escapeString(str.slice(lastIndex, match.index)) + '\'');
 	    }
 	    gen.push(transformCode(code, scope, config));
 	    lastIndex = expressionTagReg.lastIndex;
 	  }
 	
 	  if (lastIndex < totalLength) {
-	    gen.push('\'' + str.slice(lastIndex) + '\'');
+	    gen.push('\'' + escapeString(str.slice(lastIndex)) + '\'');
 	  }
 	  return gen;
 	}
