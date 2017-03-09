@@ -212,7 +212,7 @@ assign(MLTransformer.prototype, {
     }
     let error;
     if (attrName) {
-      error = `parse tag's attribute ${attrName} error:\
+      error = `parse tag's attribute ${attrName} error: \
 ${this.template.slice(startIndex, endIndex)}`;
     } else {
       error = `parse text error: ${text}`;
@@ -476,19 +476,20 @@ ${this.template.slice(startIndex, endIndex)}`;
         transformedAttrs.key = `{${forKey}}`;
       }
       Object.keys(attrs).forEach((attrName_) => {
-        let attrKey = attrName_;
-        if (this.SPECIAL_ATTRS.indexOf(attrKey) !== -1) {
+        let attrName = attrName_;
+        if (this.SPECIAL_ATTRS.indexOf(attrName) !== -1) {
           return;
         }
-        const attrValue = attrs[attrKey];
+        const attrValue = attrs[attrName];
         let transformedAttrValue = attrValue;
         if (attrValue === null) {
           return;
         }
         const info = {
           attrValue,
-          attrKey,
-          tag,
+          attrName,
+          attrKey: attrName,
+          node,
           attrs,
           transformedAttrs,
           transformer: this,
@@ -496,21 +497,21 @@ ${this.template.slice(startIndex, endIndex)}`;
         if (attributeProcessor && attributeProcessor(info) === false) {
           return;
         }
-        if (attrKey === 'class') {
-          attrKey = 'className';
-        }
         if (hasExpression(attrValue)) {
           transformedAttrValue = `{${this.processExpression(attrValue, {
             node,
-            attrName: attrName_,
+            attrName,
           })}}`;
         } else if (attrValue) {
           transformedAttrValue = isNumber(attrValue) ? `{${attrValue}}` : `"${attrValue}"`;
         } else {
           transformedAttrValue = null;
         }
+        if (attrName === 'class') {
+          attrName = 'className';
+        }
         if (transformedAttrValue !== undefined) {
-          transformedAttrs[attrKey] = transformedAttrValue;
+          transformedAttrs[attrName] = transformedAttrValue;
         }
       });
       const originalTag = tag;
