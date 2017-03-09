@@ -245,11 +245,14 @@ webpackJsonp([0,1],[
 	
 	    var handler = new DomHandler(function (error, children) {
 	      if (error) {
-	        done(error);
-	        return;
+	        return done(error);
 	      }
-	      // console.log(util.inspect(children, false, null));
-	      _this.generateCodeForTags(children, TOP_LEVEL);
+	
+	      try {
+	        _this.generateCodeForTags(children, TOP_LEVEL);
+	      } catch (e) {
+	        return done(e);
+	      }
 	
 	      if (!code.length) {
 	        code.push('null');
@@ -301,7 +304,9 @@ webpackJsonp([0,1],[
 	      _this.code = header.concat(code);
 	      done(null, _this.code.join('\n'));
 	    }, {
-	      normalizeWhitespace: true
+	      normalizeWhitespace: true,
+	      withStartIndices: true,
+	      withEndIndices: true
 	    });
 	    var parser = new htmlparser.Parser(handler, {
 	      xmlMode: true
@@ -314,6 +319,36 @@ webpackJsonp([0,1],[
 	  },
 	  pushHeaderCode: function pushHeaderCode(level, str) {
 	    this.header.push(padding(level, str));
+	  },
+	  throwParseError: function throwParseError(config) {
+	    var node = config.node,
+	        text = config.text,
+	        attrName = config.attrName;
+	
+	    var endIndex = node.endIndex;
+	    var startIndex = node.startIndex;
+	    if (node.children && node.children[0]) {
+	      endIndex = node.children[0].startIndex;
+	    }
+	    var error = void 0;
+	    if (attrName) {
+	      error = 'parse tag\'s attribute ' + attrName + ' error:' + this.template.slice(startIndex, endIndex);
+	    } else {
+	      error = 'parse text error: ' + text;
+	    }
+	    var oe = new Error(error);
+	    assign(oe, config, {
+	      startIndex: startIndex,
+	      endIndex: endIndex
+	    });
+	    throw oe;
+	  },
+	  processExpression: function processExpression(exp, config) {
+	    try {
+	      return transformExpression(exp, this.scope, config);
+	    } catch (e) {
+	      this.throwParseError(config);
+	    }
 	  },
 	  generateCodeForTags: function generateCodeForTags(children_, level, arrayForm_) {
 	    var _this2 = this;
@@ -328,17 +363,20 @@ webpackJsonp([0,1],[
 	        });
 	        var l = children.length;
 	
-	        var transformIf = function transformIf(c, name) {
+	        var transformIf = function transformIf(c, attrName) {
 	          var attrs = c.attribs;
-	          if (attrs && name in attrs) {
+	          if (attrs && attrName in attrs) {
 	            var _ret2 = function () {
-	              var ifValue = attrs[name];
-	              if (!isTopLevel(level) && name === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection()) {
+	              var ifValue = attrs[attrName];
+	              if (!isTopLevel(level) && attrName === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection()) {
 	                _this2.pushCode(level, '{');
 	              }
 	              var ifExp = void 0;
 	              if (ifValue) {
-	                ifExp = transformExpression(ifValue, _this2.scope);
+	                ifExp = _this2.processExpression(ifValue, {
+	                  node: c,
+	                  attrName: attrName
+	                });
 	              }
 	              _this2.pushCode(level, '(');
 	              if (ifExp) {
@@ -368,7 +406,7 @@ webpackJsonp([0,1],[
 	                _this2.pushCode(level, 'null');
 	              }
 	              _this2.pushCode(level, ')');
-	              if (!isTopLevel(level) && name === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection()) {
+	              if (!isTopLevel(level) && attrName === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection()) {
 	                _this2.pushCode(level, '}');
 	              }
 	              return {
@@ -407,7 +445,7 @@ webpackJsonp([0,1],[
 	      })();
 	    }
 	  },
-	  generateCodeForTag: function generateCodeForTag(content, level_) {
+	  generateCodeForTag: function generateCodeForTag(node, level_) {
 	    var _this3 = this;
 	
 	    var importTplDeps = this.importTplDeps,
@@ -425,19 +463,22 @@ webpackJsonp([0,1],[
 	
 	
 	    var level = level_ || 0;
-	    if (content.type === 'text') {
-	      var text = content.data.trim();
+	    if (node.type === 'text') {
+	      var text = node.data.trim();
 	      if (text) {
 	        var isStartOfCodeSection = this.isStartOfCodeSection();
 	        var isEndOfCodeSection = this.isEndOfCodeSection();
-	        text = '' + (isTopLevel(level) || !isStartOfCodeSection ? '' : '{') + transformExpression(text, this.scope) + (isTopLevel(level) || !isEndOfCodeSection ? '' : '}');
-	        this.pushCode(level, text);
+	        var codeText = '' + (isTopLevel(level) || !isStartOfCodeSection ? '' : '{') + this.processExpression(text, {
+	          node: node,
+	          text: text
+	        }) + (isTopLevel(level) || !isEndOfCodeSection ? '' : '}');
+	        this.pushCode(level, codeText);
 	      }
 	      return;
 	    }
 	
-	    if (content.type === 'script' && allowScript) {
-	      var children = content.children;
+	    if (node.type === 'script' && allowScript) {
+	      var children = node.children;
 	
 	      children = children && children[0];
 	      var script = children && children.data;
@@ -446,16 +487,24 @@ webpackJsonp([0,1],[
 	      }
 	    }
 	
-	    var tag = content.type === 'tag' && content.name;
+	    var tag = node.type === 'tag' && node.name;
 	    if (!tag) {
 	      return;
 	    }
 	
-	    var attrs = content.attribs || {};
+	    var attrs = node.attribs || {};
 	
 	    if (tag === 'import-module') {
 	      if (allowImportModule) {
-	        var deps = attrs.name && processImportComponent(attrs.name);
+	        var deps = void 0;
+	        try {
+	          deps = attrs.name && processImportComponent(attrs.name);
+	        } catch (e) {
+	          this.throwParseError({
+	            node: node,
+	            attrName: 'name'
+	          });
+	        }
 	        var depCode = '';
 	        if (Array.isArray(deps)) {
 	          depCode = deps.map(function (d) {
@@ -477,14 +526,21 @@ webpackJsonp([0,1],[
 	
 	    if (tag === 'template') {
 	      if (attrs.is) {
-	        var data = attrs.data ? transformExpression(attrs.data, this.scope, { forceObject: true }) || 'undefined' : 'undefined';
-	        var is = transformExpression(attrs.is, this.scope);
+	        var data = attrs.data ? this.processExpression(attrs.data, {
+	          forceObject: true,
+	          node: node,
+	          attrName: 'data'
+	        }) || 'undefined' : 'undefined';
+	        var is = this.processExpression(attrs.is, {
+	          node: node,
+	          attrName: 'is'
+	        });
 	        this.pushCode(level, (this.isStartOfCodeSection() ? '{' : '') + ' $templates$[' + is + '].call(this, ' + data + ') ' + (this.isEndOfCodeSection() ? '}' : ''));
 	      } else {
 	        this.pushState();
 	        var name = attrs.name;
 	
-	        this.generateCodeForTags(content.children, TOP_LEVEL);
+	        this.generateCodeForTags(node.children, TOP_LEVEL);
 	        subTemplatesCode[name] = this.popState().code;
 	      }
 	      return;
@@ -513,7 +569,10 @@ webpackJsonp([0,1],[
 	      if (_isStartOfCodeSection && !isTopLevel(level)) {
 	        this.pushCode(level, '{');
 	      }
-	      var forExp = transformExpression(attrs[this.FOR_ATTR_NAME], this.scope);
+	      var forExp = this.processExpression(attrs[this.FOR_ATTR_NAME], {
+	        node: node,
+	        attrName: this.FOR_ATTR_NAME
+	      });
 	      var indexName = attrs[this.FOR_INDEX_ATTR_NAME] || 'index';
 	      var itemName = attrs[this.FOR_ITEM_ATTR_NAME] || 'item';
 	      var keyName = attrs[this.FOR_KEY_ATTR_NAME];
@@ -533,8 +592,8 @@ webpackJsonp([0,1],[
 	        if (forKey) {
 	          transformedAttrs.key = '{' + forKey + '}';
 	        }
-	        Object.keys(attrs).forEach(function (attrKey_) {
-	          var attrKey = attrKey_;
+	        Object.keys(attrs).forEach(function (attrName_) {
+	          var attrKey = attrName_;
 	          if (_this3.SPECIAL_ATTRS.indexOf(attrKey) !== -1) {
 	            return;
 	          }
@@ -558,7 +617,10 @@ webpackJsonp([0,1],[
 	            attrKey = 'className';
 	          }
 	          if (hasExpression(attrValue)) {
-	            transformedAttrValue = '{' + transformExpression(attrValue, _this3.scope) + '}';
+	            transformedAttrValue = '{' + _this3.processExpression(attrValue, {
+	              node: node,
+	              attrName: attrName_
+	            }) + '}';
 	          } else if (attrValue) {
 	            transformedAttrValue = isNumber(attrValue) ? '{' + attrValue + '}' : '"' + attrValue + '"';
 	          } else {
@@ -597,11 +659,11 @@ webpackJsonp([0,1],[
 	          _this3.pushCode(level, '<' + tag + '>');
 	        }
 	
-	        if (content.children) {
+	        if (node.children) {
 	          // new code section start
 	          // <view>{}</view>
 	          _this3.pushCodeSection();
-	          _this3.generateCodeForTags(content.children, nextLevel, false);
+	          _this3.generateCodeForTags(node.children, nextLevel, false);
 	          _this3.popCodeSection();
 	        }
 	
@@ -609,9 +671,9 @@ webpackJsonp([0,1],[
 	      }();
 	
 	      if ((typeof _ret4 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret4)) === "object") return _ret4.v;
-	    } else if (content.children) {
+	    } else if (node.children) {
 	      // block will not emit any tag, so reuse current code section
-	      this.generateCodeForTags(content.children, level);
+	      this.generateCodeForTags(node.children, level);
 	    }
 	
 	    if (inFor) {
