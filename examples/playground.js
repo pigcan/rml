@@ -332,7 +332,7 @@ webpackJsonp([0,1],[
 	    }
 	    var error = void 0;
 	    if (attrName) {
-	      error = 'parse tag\'s attribute ' + attrName + ' error:' + this.template.slice(startIndex, endIndex);
+	      error = 'parse tag\'s attribute ' + attrName + ' error: ' + this.template.slice(startIndex, endIndex);
 	    } else {
 	      error = 'parse text error: ' + text;
 	    }
@@ -593,19 +593,20 @@ webpackJsonp([0,1],[
 	          transformedAttrs.key = '{' + forKey + '}';
 	        }
 	        Object.keys(attrs).forEach(function (attrName_) {
-	          var attrKey = attrName_;
-	          if (_this3.SPECIAL_ATTRS.indexOf(attrKey) !== -1) {
+	          var attrName = attrName_;
+	          if (_this3.SPECIAL_ATTRS.indexOf(attrName) !== -1) {
 	            return;
 	          }
-	          var attrValue = attrs[attrKey];
+	          var attrValue = attrs[attrName];
 	          var transformedAttrValue = attrValue;
 	          if (attrValue === null) {
 	            return;
 	          }
 	          var info = {
 	            attrValue: attrValue,
-	            attrKey: attrKey,
-	            tag: tag,
+	            attrName: attrName,
+	            attrKey: attrName,
+	            node: node,
 	            attrs: attrs,
 	            transformedAttrs: transformedAttrs,
 	            transformer: _this3
@@ -613,21 +614,21 @@ webpackJsonp([0,1],[
 	          if (attributeProcessor && attributeProcessor(info) === false) {
 	            return;
 	          }
-	          if (attrKey === 'class') {
-	            attrKey = 'className';
-	          }
 	          if (hasExpression(attrValue)) {
 	            transformedAttrValue = '{' + _this3.processExpression(attrValue, {
 	              node: node,
-	              attrName: attrName_
+	              attrName: attrName
 	            }) + '}';
 	          } else if (attrValue) {
 	            transformedAttrValue = isNumber(attrValue) ? '{' + attrValue + '}' : '"' + attrValue + '"';
 	          } else {
 	            transformedAttrValue = null;
 	          }
+	          if (attrName === 'class') {
+	            attrName = 'className';
+	          }
 	          if (transformedAttrValue !== undefined) {
-	            transformedAttrs[attrKey] = transformedAttrValue;
+	            transformedAttrs[attrName] = transformedAttrValue;
 	          }
 	        });
 	        var originalTag = tag;
