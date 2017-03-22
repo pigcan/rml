@@ -104,7 +104,7 @@ describe('conditional render', () => {
         `        (`,
         `        ((data.t > 1)) ?`,
         `        (`,
-        `         $templates$['x'].call(this, undefined) `,
+        `        $templates$['x'].call(this, undefined)`,
         `        )`,
         `        :`,
         `        null`,

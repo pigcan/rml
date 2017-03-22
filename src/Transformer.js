@@ -26,6 +26,17 @@ function isTopLevel(level) {
   return level === 4;
 }
 
+function notJsx(c) {
+  if (c.type === 'script') {
+    return true;
+  }
+  const tag = c.type === 'tag' && c.name;
+  if (tag === 'import-module' || tag === 'import') {
+    return true;
+  }
+  return false;
+}
+
 function countValidChildren(children = []) {
   return children.reduce((count, c) => {
     if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
@@ -80,11 +91,17 @@ function MLTransformer(template, config_) {
 }
 
 assign(MLTransformer.prototype, {
-  isStartOfCodeSection() {
-    return ++this.codeDepth[this.codeDepth.length - 1] === 1;
+  isStartOfCodeSection(level, preCalculate) {
+    if (preCalculate) {
+      return ++this.codeDepth[this.codeDepth.length - 1] === 1 && !isTopLevel(level);
+    }
+    return !isTopLevel(level) && ++this.codeDepth[this.codeDepth.length - 1] === 1;
   },
-  isEndOfCodeSection() {
-    return --this.codeDepth[this.codeDepth.length - 1] === 0;
+  isEndOfCodeSection(level, preCalculate) {
+    if (preCalculate) {
+      return --this.codeDepth[this.codeDepth.length - 1] === 0 && !isTopLevel(level);
+    }
+    return !isTopLevel(level) && --this.codeDepth[this.codeDepth.length - 1] === 0;
   },
   pushCodeSection() {
     this.codeDepth.push(0);
@@ -245,7 +262,7 @@ ${this.template.slice(startIndex, endIndex)}`;
         const attrs = c.attribs;
         if (attrs && attrName in attrs) {
           const ifValue = attrs[attrName];
-          if (!isTopLevel(level) && attrName === this.IF_ATTR_NAME && this.isStartOfCodeSection()) {
+          if (attrName === this.IF_ATTR_NAME && this.isStartOfCodeSection(level)) {
             this.pushCode(level, '{');
           }
           let ifExp;
@@ -281,7 +298,7 @@ ${this.template.slice(startIndex, endIndex)}`;
             this.pushCode(level, 'null');
           }
           this.pushCode(level, ')');
-          if (!isTopLevel(level) && attrName === this.IF_ATTR_NAME && this.isEndOfCodeSection()) {
+          if (attrName === this.IF_ATTR_NAME && this.isEndOfCodeSection(level)) {
             this.pushCode(level, '}');
           }
           return true;
@@ -290,8 +307,7 @@ ${this.template.slice(startIndex, endIndex)}`;
       };
 
       if (arrayForm) {
-        const isStartOfCodeSection = this.isStartOfCodeSection();
-        if (!isTopLevel(level) && isStartOfCodeSection) {
+        if (this.isStartOfCodeSection(level, true)) {
           this.pushCode(level, '{');
         }
         this.pushCode(level, '[');
@@ -301,14 +317,13 @@ ${this.template.slice(startIndex, endIndex)}`;
         if (!transformIf(child, this.IF_ATTR_NAME)) {
           this.generateCodeForTag(child, level);
         }
-        if (arrayForm) {
+        if (arrayForm && !notJsx(child)) {
           this.pushCode(level, ',');
         }
       }
       if (arrayForm) {
         this.pushCode(level, ']');
-        const isEndOfCodeSection = this.isEndOfCodeSection();
-        if (!isTopLevel(level) && isEndOfCodeSection) {
+        if (this.isEndOfCodeSection(level, true)) {
           this.pushCode(level, '}');
         }
       }
@@ -334,16 +349,14 @@ ${this.template.slice(startIndex, endIndex)}`;
     if (node.type === 'text') {
       const text = node.data.trim();
       if (text) {
-        const isStartOfCodeSection = this.isStartOfCodeSection();
-        const isEndOfCodeSection = this.isEndOfCodeSection();
-        const codeText = `${isTopLevel(level) || !isStartOfCodeSection ?
-          '' : '{'}${
+        const codeText = `${this.isStartOfCodeSection(level) ?
+          '{' : ''}${
           this.processExpression(text, {
             node,
             text,
           })}${
-          isTopLevel(level) || !isEndOfCodeSection ?
-            '' : '}'}`;
+          this.isEndOfCodeSection(level) ?
+            '}' : ''}`;
         this.pushCode(level, codeText);
       }
       return;
@@ -410,9 +423,9 @@ ${this.template.slice(startIndex, endIndex)}`;
         });
         this.pushCode(level,
           `${
-            this.isStartOfCodeSection() ? '{' : ''
-            } $templates$[${is}].call(this, ${data}) ${
-            this.isEndOfCodeSection() ? '}' : ''
+            this.isStartOfCodeSection(level) ? '{ ' : ''
+            }$templates$[${is}].call(this, ${data})${
+            this.isEndOfCodeSection(level) ? ' }' : ''
             }`);
       } else {
         this.pushState();
@@ -435,9 +448,9 @@ ${this.template.slice(startIndex, endIndex)}`;
       includeTplDeps[includePath] = includeTplDeps[includePath] ||
         (this.importIncludeIndex++);
       this.pushCode(level, `${
-        this.isStartOfCodeSection() ? '{' : ''
-        } $render$${includeTplDeps[includePath]}.apply(this, arguments) ${
-        this.isEndOfCodeSection() ? '}' : ''
+        this.isStartOfCodeSection(level) ? '{ ' : ''
+        }$render$${includeTplDeps[includePath]}.apply(this, arguments)${
+        this.isEndOfCodeSection(level) ? ' }' : ''
         }`);
       return;
     }
@@ -446,8 +459,7 @@ ${this.template.slice(startIndex, endIndex)}`;
     let forKey;
     if (this.FOR_ATTR_NAME in attrs) {
       inFor = true;
-      const isStartOfCodeSection = this.isStartOfCodeSection();
-      if (isStartOfCodeSection && !isTopLevel(level)) {
+      if (this.isStartOfCodeSection(level, true)) {
         this.pushCode(level, '{');
       }
       const forExp = this.processExpression(attrs[this.FOR_ATTR_NAME], {
@@ -565,8 +577,7 @@ ${this.template.slice(startIndex, endIndex)}`;
       }
       level -= 2;
       this.pushCode(level, '})');
-      const isEndOfCodeSection = this.isEndOfCodeSection();
-      if (isEndOfCodeSection && !isTopLevel(level)) {
+      if (this.isEndOfCodeSection(level, true)) {
         this.pushCode(level, '}');
       }
     }

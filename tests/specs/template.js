@@ -5,6 +5,67 @@ const MLTransformer = require('../../src/Transformer');
 
 describe('MLTransformer', () => {
   describe('template', () => {
+    it('support standalone', (done) => {
+      new MLTransformer(
+        `
+<import src='q' />
+<import-module name="x" from="y" />
+<template is="z" />
+`.trim()
+      ).transform((err, code) => {
+        expect(code).to.be(`
+import React from 'react';
+import assign from 'object-assign';
+import { $ownTemplates$ as $ownTemplates$1 } from './q';
+
+let $templates$ = {};
+export const $ownTemplates$ = {};
+$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);
+export default function render(data) {
+  return (
+    $templates$['z'].call(this, undefined)
+  );
+};
+
+`.trim());
+        done();
+      });
+    });
+
+
+    it('support standalone array', (done) => {
+      new MLTransformer(
+        `
+<import src='q' />
+<import-module name="x" from="y" />
+<template is="z" />
+<view/>
+`.trim()
+      ).transform((err, code) => {
+        expect(code).to.be(`
+import React from 'react';
+import assign from 'object-assign';
+import { $ownTemplates$ as $ownTemplates$1 } from './q';
+
+let $templates$ = {};
+export const $ownTemplates$ = {};
+$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);
+export default function render(data) {
+  return (
+    [
+    $templates$['z'].call(this, undefined)
+    ,
+    <view>
+    </view>
+    ,
+    ]
+  );
+};
+`.trim());
+        done();
+      });
+    });
+
     it('support simple', (done) => {
       new MLTransformer([
         `<template name="t">`,
@@ -103,6 +164,27 @@ describe('MLTransformer', () => {
   });
 
   describe('include', () => {
+    it('support standalone', (done) => {
+      new MLTransformer(
+        `
+<import-module name="x" from="y" />
+<include src="z" />
+`.trim()
+      ).transform((err, code) => {
+        expect(code).to.be(`
+import React from 'react';
+import $render$1 from './z';
+
+export default function render(data) {
+  return (
+    $render$1.apply(this, arguments)
+  );
+};
+`.trim());
+        done();
+      });
+    });
+
     it('support simple', (done) => {
       new MLTransformer([
         `<div>`,
