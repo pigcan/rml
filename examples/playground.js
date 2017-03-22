@@ -151,6 +151,17 @@ webpackJsonp([0,1],[
 	  return level === 4;
 	}
 	
+	function notJsx(c) {
+	  if (c.type === 'script') {
+	    return true;
+	  }
+	  var tag = c.type === 'tag' && c.name;
+	  if (tag === 'import-module' || tag === 'import') {
+	    return true;
+	  }
+	  return false;
+	}
+	
 	function countValidChildren() {
 	  var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 	
@@ -200,11 +211,17 @@ webpackJsonp([0,1],[
 	}
 	
 	assign(MLTransformer.prototype, {
-	  isStartOfCodeSection: function isStartOfCodeSection() {
-	    return ++this.codeDepth[this.codeDepth.length - 1] === 1;
+	  isStartOfCodeSection: function isStartOfCodeSection(level, preCalculate) {
+	    if (preCalculate) {
+	      return ++this.codeDepth[this.codeDepth.length - 1] === 1 && !isTopLevel(level);
+	    }
+	    return !isTopLevel(level) && ++this.codeDepth[this.codeDepth.length - 1] === 1;
 	  },
-	  isEndOfCodeSection: function isEndOfCodeSection() {
-	    return --this.codeDepth[this.codeDepth.length - 1] === 0;
+	  isEndOfCodeSection: function isEndOfCodeSection(level, preCalculate) {
+	    if (preCalculate) {
+	      return --this.codeDepth[this.codeDepth.length - 1] === 0 && !isTopLevel(level);
+	    }
+	    return !isTopLevel(level) && --this.codeDepth[this.codeDepth.length - 1] === 0;
 	  },
 	  pushCodeSection: function pushCodeSection() {
 	    this.codeDepth.push(0);
@@ -368,7 +385,7 @@ webpackJsonp([0,1],[
 	          if (attrs && attrName in attrs) {
 	            var _ret2 = function () {
 	              var ifValue = attrs[attrName];
-	              if (!isTopLevel(level) && attrName === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection()) {
+	              if (attrName === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection(level)) {
 	                _this2.pushCode(level, '{');
 	              }
 	              var ifExp = void 0;
@@ -406,7 +423,7 @@ webpackJsonp([0,1],[
 	                _this2.pushCode(level, 'null');
 	              }
 	              _this2.pushCode(level, ')');
-	              if (!isTopLevel(level) && attrName === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection()) {
+	              if (attrName === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection(level)) {
 	                _this2.pushCode(level, '}');
 	              }
 	              return {
@@ -420,8 +437,7 @@ webpackJsonp([0,1],[
 	        };
 	
 	        if (arrayForm) {
-	          var isStartOfCodeSection = _this2.isStartOfCodeSection();
-	          if (!isTopLevel(level) && isStartOfCodeSection) {
+	          if (_this2.isStartOfCodeSection(level, true)) {
 	            _this2.pushCode(level, '{');
 	          }
 	          _this2.pushCode(level, '[');
@@ -431,14 +447,13 @@ webpackJsonp([0,1],[
 	          if (!transformIf(child, _this2.IF_ATTR_NAME)) {
 	            _this2.generateCodeForTag(child, level);
 	          }
-	          if (arrayForm) {
+	          if (arrayForm && !notJsx(child)) {
 	            _this2.pushCode(level, ',');
 	          }
 	        }
 	        if (arrayForm) {
 	          _this2.pushCode(level, ']');
-	          var isEndOfCodeSection = _this2.isEndOfCodeSection();
-	          if (!isTopLevel(level) && isEndOfCodeSection) {
+	          if (_this2.isEndOfCodeSection(level, true)) {
 	            _this2.pushCode(level, '}');
 	          }
 	        }
@@ -466,12 +481,10 @@ webpackJsonp([0,1],[
 	    if (node.type === 'text') {
 	      var text = node.data.trim();
 	      if (text) {
-	        var isStartOfCodeSection = this.isStartOfCodeSection();
-	        var isEndOfCodeSection = this.isEndOfCodeSection();
-	        var codeText = '' + (isTopLevel(level) || !isStartOfCodeSection ? '' : '{') + this.processExpression(text, {
+	        var codeText = '' + (this.isStartOfCodeSection(level) ? '{' : '') + this.processExpression(text, {
 	          node: node,
 	          text: text
-	        }) + (isTopLevel(level) || !isEndOfCodeSection ? '' : '}');
+	        }) + (this.isEndOfCodeSection(level) ? '}' : '');
 	        this.pushCode(level, codeText);
 	      }
 	      return;
@@ -535,7 +548,7 @@ webpackJsonp([0,1],[
 	          node: node,
 	          attrName: 'is'
 	        });
-	        this.pushCode(level, (this.isStartOfCodeSection() ? '{' : '') + ' $templates$[' + is + '].call(this, ' + data + ') ' + (this.isEndOfCodeSection() ? '}' : ''));
+	        this.pushCode(level, (this.isStartOfCodeSection(level) ? '{ ' : '') + '$templates$[' + is + '].call(this, ' + data + ')' + (this.isEndOfCodeSection(level) ? ' }' : ''));
 	      } else {
 	        this.pushState();
 	        var name = attrs.name;
@@ -555,7 +568,7 @@ webpackJsonp([0,1],[
 	    if (tag === 'include') {
 	      var includePath = transformAbsoluteToRelative(projectRoot, renderPath, attrs.src);
 	      includeTplDeps[includePath] = includeTplDeps[includePath] || this.importIncludeIndex++;
-	      this.pushCode(level, (this.isStartOfCodeSection() ? '{' : '') + ' $render$' + includeTplDeps[includePath] + '.apply(this, arguments) ' + (this.isEndOfCodeSection() ? '}' : ''));
+	      this.pushCode(level, (this.isStartOfCodeSection(level) ? '{ ' : '') + '$render$' + includeTplDeps[includePath] + '.apply(this, arguments)' + (this.isEndOfCodeSection(level) ? ' }' : ''));
 	      return;
 	    }
 	
@@ -565,8 +578,7 @@ webpackJsonp([0,1],[
 	      var _scope$push;
 	
 	      inFor = true;
-	      var _isStartOfCodeSection = this.isStartOfCodeSection();
-	      if (_isStartOfCodeSection && !isTopLevel(level)) {
+	      if (this.isStartOfCodeSection(level, true)) {
 	        this.pushCode(level, '{');
 	      }
 	      var forExp = this.processExpression(attrs[this.FOR_ATTR_NAME], {
@@ -685,8 +697,7 @@ webpackJsonp([0,1],[
 	      }
 	      level -= 2;
 	      this.pushCode(level, '})');
-	      var _isEndOfCodeSection = this.isEndOfCodeSection();
-	      if (_isEndOfCodeSection && !isTopLevel(level)) {
+	      if (this.isEndOfCodeSection(level, true)) {
 	        this.pushCode(level, '}');
 	      }
 	    }
