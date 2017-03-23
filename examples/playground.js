@@ -125,8 +125,7 @@ webpackJsonp([0,1],[
 	var DomHandler = __webpack_require__(89);
 	
 	var _require = __webpack_require__(130),
-	    transformExpression = _require.transformExpression,
-	    hasExpression = _require.hasExpression;
+	    transformExpression = _require.transformExpression;
 	
 	var utils = __webpack_require__(514);
 	var processImportComponent = __webpack_require__(516);
@@ -135,7 +134,6 @@ webpackJsonp([0,1],[
 	var camelCase = utils.camelCase,
 	    padding = utils.padding,
 	    startsWith = utils.startsWith,
-	    isNumber = utils.isNumber,
 	    transformAbsoluteToRelative = utils.transformAbsoluteToRelative;
 	
 	var cwd = process.cwd();
@@ -626,13 +624,11 @@ webpackJsonp([0,1],[
 	          if (attributeProcessor && attributeProcessor(info) === false) {
 	            return;
 	          }
-	          if (hasExpression(attrValue)) {
+	          if (attrValue) {
 	            transformedAttrValue = '{' + _this3.processExpression(attrValue, {
 	              node: node,
 	              attrName: attrName
 	            }) + '}';
-	          } else if (attrValue) {
-	            transformedAttrValue = isNumber(attrValue) ? '{' + attrValue + '}' : '"' + attrValue + '"';
 	          } else {
 	            transformedAttrValue = null;
 	          }
