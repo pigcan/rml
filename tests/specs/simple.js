@@ -4,6 +4,30 @@ const expect = require('expect.js');
 const MLTransformer = require('../../src/Transformer');
 
 describe('MLTransformer', () => {
+  it('escape attribute', (done) => {
+    new MLTransformer(
+      `
+<a x='"\`'>"'\`</a>
+`.trim()
+    ).transform((err, code) => {
+      expect(code).to.be(`
+import React from 'react';
+
+export default function render(data) {
+  return (
+    <a
+      x = {'"\`'}
+    >
+      {'"\\'\`'}
+    </a>
+  );
+};
+`.trim());
+
+      done();
+    });
+  });
+
   it('support simple', (done) => {
     new MLTransformer([
       '<div prop="{{a+b}}" x="1" onClick="{{this.onClick}}">',

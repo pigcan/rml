@@ -3,7 +3,7 @@
 const assign = require('object-assign');
 const htmlparser = require('htmlparser2');
 const DomHandler = require('domhandler');
-const { transformExpression, hasExpression } = require('./expression');
+const { transformExpression } = require('./expression');
 const utils = require('./utils');
 const processImportComponent = require('./processImportComponent');
 
@@ -11,7 +11,7 @@ const IMPORT = 'import';
 const {
   camelCase,
   padding, startsWith,
-  isNumber, transformAbsoluteToRelative,
+  transformAbsoluteToRelative,
 } = utils;
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
@@ -509,13 +509,11 @@ ${this.template.slice(startIndex, endIndex)}`;
         if (attributeProcessor && attributeProcessor(info) === false) {
           return;
         }
-        if (hasExpression(attrValue)) {
+        if (attrValue) {
           transformedAttrValue = `{${this.processExpression(attrValue, {
             node,
             attrName,
           })}}`;
-        } else if (attrValue) {
-          transformedAttrValue = isNumber(attrValue) ? `{${attrValue}}` : `"${attrValue}"`;
         } else {
           transformedAttrValue = null;
         }
