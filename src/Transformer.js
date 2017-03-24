@@ -139,12 +139,14 @@ assign(MLTransformer.prototype, {
 
     const handler = new DomHandler((error, children) => {
       if (error) {
+        console.error(error);
         return done(error);
       }
 
       try {
         this.generateCodeForTags(children, TOP_LEVEL);
       } catch (e) {
+        console.error(e);
         return done(e);
       }
 
@@ -155,12 +157,17 @@ assign(MLTransformer.prototype, {
       if (Object.keys(importTplDeps).length) {
         header.push(`import assign from 'object-assign';`);
       }
-      Object.keys(componentDeps).forEach((dep) => {
-        const importStatement = importComponent(dep);
-        if (importStatement !== false) {
-          header.push(importStatement);
-        }
-      });
+      try {
+        Object.keys(componentDeps).forEach((dep) => {
+          const importStatement = importComponent(dep);
+          if (importStatement !== false) {
+            header.push(importStatement);
+          }
+        });
+      } catch (e) {
+        console.error(e);
+        return done(e);
+      }
       const subTemplatesName = [];
       Object.keys(importTplDeps).forEach((dep) => {
         const index = importTplDeps[dep];
