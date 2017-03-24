@@ -260,12 +260,14 @@ webpackJsonp([0,1],[
 	
 	    var handler = new DomHandler(function (error, children) {
 	      if (error) {
+	        console.error(error);
 	        return done(error);
 	      }
 	
 	      try {
 	        _this.generateCodeForTags(children, TOP_LEVEL);
 	      } catch (e) {
+	        console.error(e);
 	        return done(e);
 	      }
 	
@@ -276,12 +278,17 @@ webpackJsonp([0,1],[
 	      if (Object.keys(importTplDeps).length) {
 	        header.push('import assign from \'object-assign\';');
 	      }
-	      Object.keys(componentDeps).forEach(function (dep) {
-	        var importStatement = importComponent(dep);
-	        if (importStatement !== false) {
-	          header.push(importStatement);
-	        }
-	      });
+	      try {
+	        Object.keys(componentDeps).forEach(function (dep) {
+	          var importStatement = importComponent(dep);
+	          if (importStatement !== false) {
+	            header.push(importStatement);
+	          }
+	        });
+	      } catch (e) {
+	        console.error(e);
+	        return done(e);
+	      }
 	      var subTemplatesName = [];
 	      Object.keys(importTplDeps).forEach(function (dep) {
 	        var index = importTplDeps[dep];
