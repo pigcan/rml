@@ -139,6 +139,7 @@ webpackJsonp([0,1],[
 	var cwd = process.cwd();
 	var TOP_LEVEL = 4;
 	
+	var defaultImportShallowequal = IMPORT + ' $shallowequal from "shallowequal";';
 	var HEADER = 'export default function render(data) {';
 	
 	function defaultImportComponent() {
@@ -254,7 +255,9 @@ webpackJsonp([0,1],[
 	    var _config = this.config,
 	        _config$importCompone = _config.importComponent,
 	        importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone,
-	        pure = _config.pure;
+	        pure = _config.pure,
+	        _config$importShallow = _config.importShallowequal,
+	        importShallowequal = _config$importShallow === undefined ? defaultImportShallowequal : _config$importShallow;
 	
 	
 	    var handler = new DomHandler(function (error, children) {
@@ -303,7 +306,7 @@ webpackJsonp([0,1],[
 	      if (needTemplate) {
 	        if (Object.keys(subTemplatesCode).length) {
 	          if (pure) {
-	            header.push(IMPORT + ' $shallowequal from "shallowequal";');
+	            header.push(importShallowequal);
 	            header.push('');
 	            header.push('const $ownTemplatesCache$ = {};');
 	            header.push('const $ownTemplatesContextCache$ = {};');
