@@ -154,10 +154,7 @@ webpackJsonp([0,1],[
 	    return true;
 	  }
 	  var tag = c.type === 'tag' && c.name;
-	  if (tag === 'import-module' || tag === 'import') {
-	    return true;
-	  }
-	  return false;
+	  return tag === 'import-module' || tag === 'import';
 	}
 	
 	function countValidChildren() {
@@ -254,8 +251,10 @@ webpackJsonp([0,1],[
 	        subTemplatesCode = this.subTemplatesCode,
 	        includeTplDeps = this.includeTplDeps;
 	    var header = this.header;
-	    var _config$importCompone = this.config.importComponent,
-	        importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone;
+	    var _config = this.config,
+	        _config$importCompone = _config.importComponent,
+	        importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone,
+	        pure = _config.pure;
 	
 	
 	    var handler = new DomHandler(function (error, children) {
@@ -302,15 +301,39 @@ webpackJsonp([0,1],[
 	      header.push(''); // empty line
 	      var needTemplate = Object.keys(subTemplatesCode).length || Object.keys(importTplDeps).length;
 	      if (needTemplate) {
+	        if (Object.keys(subTemplatesCode).length) {
+	          if (pure) {
+	            header.push(IMPORT + ' $shallowequal from "shallowequal";');
+	            header.push('');
+	            header.push('const $ownTemplatesCache$ = {};');
+	            header.push('const $ownTemplatesContextCache$ = {};');
+	            header.push('const $ownTemplatesDataCache$ = {};');
+	          }
+	        }
 	        header.push('let $templates$ = {};');
 	        header.push('export const $ownTemplates$ = {};');
 	      }
 	      Object.keys(subTemplatesCode).forEach(function (name) {
 	        if (subTemplatesCode[name].length) {
 	          header.push('$ownTemplates$[\'' + name + '\'] = function (data) {');
-	          _this.pushHeaderCode(2, 'return (');
+	          if (pure) {
+	            _this.pushHeaderCode(2, 'if ($ownTemplatesCache$[\'' + name + '\'] && this === $ownTemplatesContextCache$[\'' + name + '\'] && $shallowequal(data, $ownTemplatesDataCache$[\'' + name + '\'])) {');
+	            _this.pushHeaderCode(4, 'return $ownTemplatesCache$[\'' + name + '\'];');
+	            _this.pushHeaderCode(2, '}');
+	          }
+	          if (pure) {
+	            _this.pushHeaderCode(2, 'const $ret = (');
+	          } else {
+	            _this.pushHeaderCode(2, 'return (');
+	          }
 	          header = _this.header = header.concat(subTemplatesCode[name]);
 	          _this.pushHeaderCode(2, ');');
+	          if (pure) {
+	            _this.pushHeaderCode(2, '$ownTemplatesContextCache$[\'' + name + '\'] = this;');
+	            _this.pushHeaderCode(2, '$ownTemplatesDataCache$[\'' + name + '\'] = data;');
+	            _this.pushHeaderCode(2, '$ownTemplatesCache$[\'' + name + '\'] = $ret;');
+	            _this.pushHeaderCode(2, 'return $ret;');
+	          }
 	          header.push('};');
 	        }
 	      });
@@ -472,14 +495,14 @@ webpackJsonp([0,1],[
 	        subTemplatesCode = this.subTemplatesCode,
 	        componentDeps = this.componentDeps,
 	        includeTplDeps = this.includeTplDeps;
-	    var _config = this.config,
-	        renderPath = _config.renderPath,
-	        attributeProcessor = _config.attributeProcessor,
-	        tagProcessor = _config.tagProcessor,
-	        allowScript = _config.allowScript,
-	        _config$projectRoot = _config.projectRoot,
-	        projectRoot = _config$projectRoot === undefined ? cwd : _config$projectRoot,
-	        allowImportModule = _config.allowImportModule;
+	    var _config2 = this.config,
+	        renderPath = _config2.renderPath,
+	        attributeProcessor = _config2.attributeProcessor,
+	        tagProcessor = _config2.tagProcessor,
+	        allowScript = _config2.allowScript,
+	        _config2$projectRoot = _config2.projectRoot,
+	        projectRoot = _config2$projectRoot === undefined ? cwd : _config2$projectRoot,
+	        allowImportModule = _config2.allowImportModule;
 	
 	
 	    var level = level_ || 0;
