@@ -15,8 +15,6 @@ const {
 } = utils;
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
-
-const defaultImportShallowequal = `${IMPORT} $shallowequal from "shallowequal";`;
 const HEADER = `export default function render(data) {`;
 
 function defaultImportComponent() {
@@ -134,7 +132,7 @@ assign(MLTransformer.prototype, {
     const {
       importComponent = defaultImportComponent,
       pure,
-      importShallowequal = defaultImportShallowequal,
+      templateMethods = '',
     } = this.config;
 
     const handler = new DomHandler((error, children) => {
@@ -183,42 +181,28 @@ assign(MLTransformer.prototype, {
       const needTemplate = Object.keys(subTemplatesCode).length ||
         Object.keys(importTplDeps).length;
       if (needTemplate) {
-        if (Object.keys(subTemplatesCode).length) {
-          if (pure) {
-            header.push(importShallowequal);
-            header.push('');
-            header.push(`const $ownTemplatesCache$ = {};`);
-            header.push(`const $ownTemplatesContextCache$ = {};`);
-            header.push(`const $ownTemplatesDataCache$ = {};`);
-          }
-        }
         header.push(`let $templates$ = {};`);
         header.push(`export const $ownTemplates$ = {};`);
       }
       Object.keys(subTemplatesCode).forEach((name) => {
         if (subTemplatesCode[name].length) {
           header.push(`$ownTemplates$['${name}'] = function (data) {`);
-          if (pure) {
-            this.pushHeaderCode(2, `if ($ownTemplatesCache$['${name}'] \
-&& this === $ownTemplatesContextCache$['${name}'] && \
-$shallowequal(data, $ownTemplatesDataCache$['${name}'])) {`);
-            this.pushHeaderCode(4, `return $ownTemplatesCache$['${name}'];`);
-            this.pushHeaderCode(2, `}`);
-          }
-          if (pure) {
-            this.pushHeaderCode(2, 'const $ret = (');
-          } else {
-            this.pushHeaderCode(2, 'return (');
-          }
+          this.pushHeaderCode(2, 'return (');
           header = this.header = header.concat(subTemplatesCode[name]);
           this.pushHeaderCode(2, ');');
-          if (pure) {
-            this.pushHeaderCode(2, `$ownTemplatesContextCache$['${name}'] = this;`);
-            this.pushHeaderCode(2, `$ownTemplatesDataCache$['${name}'] = data;`);
-            this.pushHeaderCode(2, `$ownTemplatesCache$['${name}'] = $ret;`);
-            this.pushHeaderCode(2, 'return $ret;');
-          }
           header.push('};');
+          if (pure) {
+            const className = name.replace(/-/, '$_$');
+            header.push(`
+class $ReactClass_${className} extends React.PureComponent {
+${templateMethods}
+  render() {
+    return $ownTemplates$['${name}'].call(this, this.props);
+  }
+}
+`);
+            header.push(`$ownTemplates$['${name}'].Component = $ReactClass_${className};`);
+          }
         }
       });
       if (Object.keys(importTplDeps).length) {
@@ -376,6 +360,7 @@ ${this.template.slice(startIndex, endIndex)}`;
       allowScript,
       projectRoot = cwd,
       allowImportModule,
+      pure,
     } = this.config;
 
     let level = level_ || 0;
@@ -457,7 +442,10 @@ ${this.template.slice(startIndex, endIndex)}`;
         this.pushCode(level,
           `${
             this.isStartOfCodeSection(level) ? '{ ' : ''
-            }$templates$[${is}].call(this, ${data})${
+            }${pure ?
+            // parent passed as children...
+            `React.createElement($templates$[${is}].Component, ${data}, this)` :
+            `$templates$[${is}].call(this, ${data})`}${
             this.isEndOfCodeSection(level) ? ' }' : ''
             }`);
       } else {

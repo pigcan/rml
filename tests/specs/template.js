@@ -46,34 +46,30 @@ export default function render(data) {
         expect(code).to.be(`
 import React from 'react';
 
-import $shallowequal from "shallowequal";
-
-const $ownTemplatesCache$ = {};
-const $ownTemplatesContextCache$ = {};
-const $ownTemplatesDataCache$ = {};
 let $templates$ = {};
 export const $ownTemplates$ = {};
 $ownTemplates$['t'] = function (data) {
-  if ($ownTemplatesCache$['t'] && \
-this === $ownTemplatesContextCache$['t'] && \
-$shallowequal(data, $ownTemplatesDataCache$['t'])) {
-    return $ownTemplatesCache$['t'];
-  }
-  const $ret = (
+  return (
     <div>
       {(data.z)}
     </div>
   );
-  $ownTemplatesContextCache$['t'] = this;
-  $ownTemplatesDataCache$['t'] = data;
-  $ownTemplatesCache$['t'] = $ret;
-  return $ret;
 };
+
+class $ReactClass_t extends React.PureComponent {
+
+  render() {
+    return $ownTemplates$['t'].call(this, this.props);
+  }
+}
+
+$ownTemplates$['t'].Component = $ReactClass_t;
 $templates$ = $ownTemplates$;
 export default function render(data) {
   return (
     <div>
-      { $templates$[(data.x % 2 ? 't' : 'z')].call(this, (({ ...data.o }))) }
+      { React.createElement($templates$[(data.x % 2 ? 't' : 'z')].Component, \
+(({ ...data.o })), this) }
     </div>
   );
 };
