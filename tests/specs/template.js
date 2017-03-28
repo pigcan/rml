@@ -32,6 +32,56 @@ export default function render(data) {
       });
     });
 
+    it('support pure', (done) => {
+      new MLTransformer(
+        [
+          `<template name="t">`,
+          `<div>{{z}}</div>`,
+          `</template>`,
+          `<div>`,
+          `<template is="{{x%2?'t':'z'}}" data="{{...o}}" />`,
+          `</div>`,
+        ].join('\n'), { pure: true }
+      ).transform((err, code) => {
+        expect(code).to.be(`
+import React from 'react';
+
+import $shallowequal from "shallowequal";
+
+const $ownTemplatesCache$ = {};
+const $ownTemplatesContextCache$ = {};
+const $ownTemplatesDataCache$ = {};
+let $templates$ = {};
+export const $ownTemplates$ = {};
+$ownTemplates$['t'] = function (data) {
+  if ($ownTemplatesCache$['t'] && \
+this === $ownTemplatesContextCache$['t'] && \
+$shallowequal(data, $ownTemplatesDataCache$['t'])) {
+    return $ownTemplatesCache$['t'];
+  }
+  const $ret = (
+    <div>
+      {(data.z)}
+    </div>
+  );
+  $ownTemplatesContextCache$['t'] = this;
+  $ownTemplatesDataCache$['t'] = data;
+  $ownTemplatesCache$['t'] = $ret;
+  return $ret;
+};
+$templates$ = $ownTemplates$;
+export default function render(data) {
+  return (
+    <div>
+      { $templates$[(data.x % 2 ? 't' : 'z')].call(this, (({ ...data.o }))) }
+    </div>
+  );
+};
+`.trim());
+        done();
+      });
+    });
+
 
     it('support standalone array', (done) => {
       new MLTransformer(

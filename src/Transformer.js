@@ -31,10 +31,7 @@ function notJsx(c) {
     return true;
   }
   const tag = c.type === 'tag' && c.name;
-  if (tag === 'import-module' || tag === 'import') {
-    return true;
-  }
-  return false;
+  return tag === 'import-module' || tag === 'import';
 }
 
 function countValidChildren(children = []) {
@@ -135,6 +132,7 @@ assign(MLTransformer.prototype, {
     let { header } = this;
     const {
       importComponent = defaultImportComponent,
+      pure,
     } = this.config;
 
     const handler = new DomHandler((error, children) => {
@@ -183,15 +181,41 @@ assign(MLTransformer.prototype, {
       const needTemplate = Object.keys(subTemplatesCode).length ||
         Object.keys(importTplDeps).length;
       if (needTemplate) {
+        if (Object.keys(subTemplatesCode).length) {
+          if (pure) {
+            header.push(`${IMPORT} $shallowequal from "shallowequal";`);
+            header.push('');
+            header.push(`const $ownTemplatesCache$ = {};`);
+            header.push(`const $ownTemplatesContextCache$ = {};`);
+            header.push(`const $ownTemplatesDataCache$ = {};`);
+          }
+        }
         header.push(`let $templates$ = {};`);
         header.push(`export const $ownTemplates$ = {};`);
       }
       Object.keys(subTemplatesCode).forEach((name) => {
         if (subTemplatesCode[name].length) {
           header.push(`$ownTemplates$['${name}'] = function (data) {`);
-          this.pushHeaderCode(2, 'return (');
+          if (pure) {
+            this.pushHeaderCode(2, `if ($ownTemplatesCache$['${name}'] \
+&& this === $ownTemplatesContextCache$['${name}'] && \
+$shallowequal(data, $ownTemplatesDataCache$['${name}'])) {`);
+            this.pushHeaderCode(4, `return $ownTemplatesCache$['${name}'];`);
+            this.pushHeaderCode(2, `}`);
+          }
+          if (pure) {
+            this.pushHeaderCode(2, 'const $ret = (');
+          } else {
+            this.pushHeaderCode(2, 'return (');
+          }
           header = this.header = header.concat(subTemplatesCode[name]);
           this.pushHeaderCode(2, ');');
+          if (pure) {
+            this.pushHeaderCode(2, `$ownTemplatesContextCache$['${name}'] = this;`);
+            this.pushHeaderCode(2, `$ownTemplatesDataCache$['${name}'] = data;`);
+            this.pushHeaderCode(2, `$ownTemplatesCache$['${name}'] = $ret;`);
+            this.pushHeaderCode(2, 'return $ret;');
+          }
           header.push('};');
         }
       });
