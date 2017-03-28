@@ -16,6 +16,7 @@ const {
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
 
+const defaultImportShallowequal = `${IMPORT} $shallowequal from "shallowequal";`;
 const HEADER = `export default function render(data) {`;
 
 function defaultImportComponent() {
@@ -133,6 +134,7 @@ assign(MLTransformer.prototype, {
     const {
       importComponent = defaultImportComponent,
       pure,
+      importShallowequal = defaultImportShallowequal,
     } = this.config;
 
     const handler = new DomHandler((error, children) => {
@@ -183,7 +185,7 @@ assign(MLTransformer.prototype, {
       if (needTemplate) {
         if (Object.keys(subTemplatesCode).length) {
           if (pure) {
-            header.push(`${IMPORT} $shallowequal from "shallowequal";`);
+            header.push(importShallowequal);
             header.push('');
             header.push(`const $ownTemplatesCache$ = {};`);
             header.push(`const $ownTemplatesContextCache$ = {};`);
