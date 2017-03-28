@@ -138,8 +138,6 @@ webpackJsonp([0,1],[
 	
 	var cwd = process.cwd();
 	var TOP_LEVEL = 4;
-	
-	var defaultImportShallowequal = IMPORT + ' $shallowequal from "shallowequal";';
 	var HEADER = 'export default function render(data) {';
 	
 	function defaultImportComponent() {
@@ -256,8 +254,8 @@ webpackJsonp([0,1],[
 	        _config$importCompone = _config.importComponent,
 	        importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone,
 	        pure = _config.pure,
-	        _config$importShallow = _config.importShallowequal,
-	        importShallowequal = _config$importShallow === undefined ? defaultImportShallowequal : _config$importShallow;
+	        _config$templateMetho = _config.templateMethods,
+	        templateMethods = _config$templateMetho === undefined ? '' : _config$templateMetho;
 	
 	
 	    var handler = new DomHandler(function (error, children) {
@@ -304,40 +302,21 @@ webpackJsonp([0,1],[
 	      header.push(''); // empty line
 	      var needTemplate = Object.keys(subTemplatesCode).length || Object.keys(importTplDeps).length;
 	      if (needTemplate) {
-	        if (Object.keys(subTemplatesCode).length) {
-	          if (pure) {
-	            header.push(importShallowequal);
-	            header.push('');
-	            header.push('const $ownTemplatesCache$ = {};');
-	            header.push('const $ownTemplatesContextCache$ = {};');
-	            header.push('const $ownTemplatesDataCache$ = {};');
-	          }
-	        }
 	        header.push('let $templates$ = {};');
 	        header.push('export const $ownTemplates$ = {};');
 	      }
 	      Object.keys(subTemplatesCode).forEach(function (name) {
 	        if (subTemplatesCode[name].length) {
 	          header.push('$ownTemplates$[\'' + name + '\'] = function (data) {');
-	          if (pure) {
-	            _this.pushHeaderCode(2, 'if ($ownTemplatesCache$[\'' + name + '\'] && this === $ownTemplatesContextCache$[\'' + name + '\'] && $shallowequal(data, $ownTemplatesDataCache$[\'' + name + '\'])) {');
-	            _this.pushHeaderCode(4, 'return $ownTemplatesCache$[\'' + name + '\'];');
-	            _this.pushHeaderCode(2, '}');
-	          }
-	          if (pure) {
-	            _this.pushHeaderCode(2, 'const $ret = (');
-	          } else {
-	            _this.pushHeaderCode(2, 'return (');
-	          }
+	          _this.pushHeaderCode(2, 'return (');
 	          header = _this.header = header.concat(subTemplatesCode[name]);
 	          _this.pushHeaderCode(2, ');');
-	          if (pure) {
-	            _this.pushHeaderCode(2, '$ownTemplatesContextCache$[\'' + name + '\'] = this;');
-	            _this.pushHeaderCode(2, '$ownTemplatesDataCache$[\'' + name + '\'] = data;');
-	            _this.pushHeaderCode(2, '$ownTemplatesCache$[\'' + name + '\'] = $ret;');
-	            _this.pushHeaderCode(2, 'return $ret;');
-	          }
 	          header.push('};');
+	          if (pure) {
+	            var className = name.replace(/-/, '$_$');
+	            header.push('\nclass $ReactClass_' + className + ' extends React.PureComponent {\n' + templateMethods + '\n  render() {\n    return $ownTemplates$[\'' + name + '\'].call(this, this.props);\n  }\n}\n');
+	            header.push('$ownTemplates$[\'' + name + '\'].Component = $ReactClass_' + className + ';');
+	          }
 	        }
 	      });
 	      if (Object.keys(importTplDeps).length) {
@@ -505,7 +484,8 @@ webpackJsonp([0,1],[
 	        allowScript = _config2.allowScript,
 	        _config2$projectRoot = _config2.projectRoot,
 	        projectRoot = _config2$projectRoot === undefined ? cwd : _config2$projectRoot,
-	        allowImportModule = _config2.allowImportModule;
+	        allowImportModule = _config2.allowImportModule,
+	        pure = _config2.pure;
 	
 	
 	    var level = level_ || 0;
@@ -579,7 +559,9 @@ webpackJsonp([0,1],[
 	          node: node,
 	          attrName: 'is'
 	        });
-	        this.pushCode(level, (this.isStartOfCodeSection(level) ? '{ ' : '') + '$templates$[' + is + '].call(this, ' + data + ')' + (this.isEndOfCodeSection(level) ? ' }' : ''));
+	        this.pushCode(level, '' + (this.isStartOfCodeSection(level) ? '{ ' : '') + (pure ?
+	        // parent passed as children...
+	        'React.createElement($templates$[' + is + '].Component, ' + data + ', this)' : '$templates$[' + is + '].call(this, ' + data + ')') + (this.isEndOfCodeSection(level) ? ' }' : ''));
 	      } else {
 	        this.pushState();
 	        var name = attrs.name;
