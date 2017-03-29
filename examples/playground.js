@@ -659,6 +659,7 @@ webpackJsonp([0,1],[
 	          var tagProcessRet = tagProcessor({
 	            attrs: attrs,
 	            transformedAttrs: transformedAttrs,
+	            node: node,
 	            tag: tag
 	          });
 	          if (tagProcessRet === false) {
