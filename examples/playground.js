@@ -156,22 +156,34 @@ webpackJsonp([0,1],[
 	  return tag === 'import-module' || tag === 'import';
 	}
 	
-	function countValidChildren() {
-	  var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	function isRenderChildrenArray() {
+	  var _this = this;
 	
-	  return children.reduce(function (count, c) {
+	  var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	  var considerFor = arguments[1];
+	
+	  var totalCount = children.reduce(function (count, c) {
 	    if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
 	      return count;
 	    }
 	    var tag = c.type === 'tag' && c.name;
 	    if (tag) {
 	      var attrs = c.attribs || {};
+	      // for is array....
+	      if (considerFor && attrs[_this.FOR_ATTR_NAME]) {
+	        return count + 2;
+	      }
+	      // elseif else not count
+	      if (attrs[_this.ELIF_ATTR_NAME] || attrs[_this.ELSE_ATTR_NAME]) {
+	        return count;
+	      }
 	      if (tag === 'import-module' || tag === 'template' && !attrs.is || tag === 'import') {
 	        return count;
 	      }
 	    }
 	    return count + 1;
 	  }, 0);
+	  return totalCount > 1;
 	}
 	
 	function MLTransformer(template, config_) {
@@ -242,7 +254,7 @@ webpackJsonp([0,1],[
 	    return state;
 	  },
 	  transform: function transform(done) {
-	    var _this = this;
+	    var _this2 = this;
 	
 	    var code = this.code,
 	        importTplDeps = this.importTplDeps,
@@ -263,7 +275,7 @@ webpackJsonp([0,1],[
 	      }
 	
 	      try {
-	        _this.generateCodeForTags(children, TOP_LEVEL);
+	        _this2.generateCodeForTags(children, TOP_LEVEL);
 	      } catch (e) {
 	        console.error(e);
 	        return done(e);
@@ -306,9 +318,9 @@ webpackJsonp([0,1],[
 	      Object.keys(subTemplatesCode).forEach(function (name) {
 	        if (subTemplatesCode[name].length) {
 	          header.push('$ownTemplates$[\'' + name + '\'] = function (data) {');
-	          _this.pushHeaderCode(2, 'return (');
-	          header = _this.header = header.concat(subTemplatesCode[name]);
-	          _this.pushHeaderCode(2, ');');
+	          _this2.pushHeaderCode(2, 'return (');
+	          header = _this2.header = header.concat(subTemplatesCode[name]);
+	          _this2.pushHeaderCode(2, ');');
 	          header.push('};');
 	          if (pure) {
 	            var className = name.replace(/-/, '$_$');
@@ -323,11 +335,11 @@ webpackJsonp([0,1],[
 	        header.push('$templates$ = $ownTemplates$;');
 	      }
 	      header.push(HEADER);
-	      _this.pushHeaderCode(2, 'return (');
-	      _this.pushCode(2, ');');
+	      _this2.pushHeaderCode(2, 'return (');
+	      _this2.pushCode(2, ');');
 	      code.push('};');
-	      _this.code = header.concat(code);
-	      done(null, _this.code.join('\n'));
+	      _this2.code = header.concat(code);
+	      done(null, _this2.code.join('\n'));
 	    }, {
 	      normalizeWhitespace: true,
 	      withStartIndices: true,
@@ -379,9 +391,9 @@ webpackJsonp([0,1],[
 	    }
 	  },
 	  generateCodeForTags: function generateCodeForTags(children_, level, arrayForm_) {
-	    var _this2 = this;
+	    var _this3 = this;
 	
-	    var arrayForm = arrayForm_ === undefined ? countValidChildren(children_) > 1 : arrayForm_;
+	    var arrayForm = arrayForm_ === undefined ? isRenderChildrenArray.call(this, children_) : arrayForm_;
 	    var children = children_;
 	    if (children) {
 	      (function () {
@@ -396,32 +408,32 @@ webpackJsonp([0,1],[
 	          if (attrs && attrName in attrs) {
 	            var _ret2 = function () {
 	              var ifValue = attrs[attrName];
-	              if (attrName === _this2.IF_ATTR_NAME && _this2.isStartOfCodeSection(level)) {
-	                _this2.pushCode(level, '{');
+	              if (attrName === _this3.IF_ATTR_NAME && _this3.isStartOfCodeSection(level)) {
+	                _this3.pushCode(level, '{');
 	              }
 	              var ifExp = void 0;
 	              if (ifValue) {
-	                ifExp = _this2.processExpression(ifValue, {
+	                ifExp = _this3.processExpression(ifValue, {
 	                  node: c,
 	                  attrName: attrName
 	                });
 	              }
-	              _this2.pushCode(level, '(');
+	              _this3.pushCode(level, '(');
 	              if (ifExp) {
-	                _this2.pushCode(level, '(' + ifExp + ') ?');
+	                _this3.pushCode(level, '(' + ifExp + ') ?');
 	              }
-	              _this2.pushCode(level, '(');
-	              _this2.generateCodeForTag(c, level);
-	              _this2.pushCode(level, ')');
+	              _this3.pushCode(level, '(');
+	              _this3.generateCodeForTag(c, level);
+	              _this3.pushCode(level, ')');
 	              var nextChild = children[i + 1];
 	              var transformed = void 0;
 	              if (ifExp) {
-	                _this2.pushCode(level, ':');
+	                _this3.pushCode(level, ':');
 	              }
 	              if (nextChild) {
 	                (function () {
 	                  var childAttrs = nextChild.attribs || {};
-	                  [_this2.ELIF_ATTR_NAME, _this2.ELSE_ATTR_NAME].forEach(function (condition) {
+	                  [_this3.ELIF_ATTR_NAME, _this3.ELSE_ATTR_NAME].forEach(function (condition) {
 	                    if (condition in childAttrs) {
 	                      i += 1;
 	                      transformIf(nextChild, condition);
@@ -431,11 +443,11 @@ webpackJsonp([0,1],[
 	                })();
 	              }
 	              if (!transformed && ifExp) {
-	                _this2.pushCode(level, 'null');
+	                _this3.pushCode(level, 'null');
 	              }
-	              _this2.pushCode(level, ')');
-	              if (attrName === _this2.IF_ATTR_NAME && _this2.isEndOfCodeSection(level)) {
-	                _this2.pushCode(level, '}');
+	              _this3.pushCode(level, ')');
+	              if (attrName === _this3.IF_ATTR_NAME && _this3.isEndOfCodeSection(level)) {
+	                _this3.pushCode(level, '}');
 	              }
 	              return {
 	                v: true
@@ -448,31 +460,31 @@ webpackJsonp([0,1],[
 	        };
 	
 	        if (arrayForm) {
-	          if (_this2.isStartOfCodeSection(level, true)) {
-	            _this2.pushCode(level, '{');
+	          if (_this3.isStartOfCodeSection(level, true)) {
+	            _this3.pushCode(level, '{');
 	          }
-	          _this2.pushCode(level, '[');
+	          _this3.pushCode(level, '[');
 	        }
 	        for (; i < l; i += 1) {
 	          var child = children[i];
-	          if (!transformIf(child, _this2.IF_ATTR_NAME)) {
-	            _this2.generateCodeForTag(child, level);
+	          if (!transformIf(child, _this3.IF_ATTR_NAME)) {
+	            _this3.generateCodeForTag(child, level);
 	          }
 	          if (arrayForm && !notJsx(child)) {
-	            _this2.pushCode(level, ',');
+	            _this3.pushCode(level, ',');
 	          }
 	        }
 	        if (arrayForm) {
-	          _this2.pushCode(level, ']');
-	          if (_this2.isEndOfCodeSection(level, true)) {
-	            _this2.pushCode(level, '}');
+	          _this3.pushCode(level, ']');
+	          if (_this3.isEndOfCodeSection(level, true)) {
+	            _this3.pushCode(level, '}');
 	          }
 	        }
 	      })();
 	    }
 	  },
 	  generateCodeForTag: function generateCodeForTag(node, level_) {
-	    var _this3 = this;
+	    var _this4 = this;
 	
 	    var importTplDeps = this.importTplDeps,
 	        subTemplatesCode = this.subTemplatesCode,
@@ -534,7 +546,7 @@ webpackJsonp([0,1],[
 	        if (Array.isArray(deps)) {
 	          depCode = deps.map(function (d) {
 	            var variableName = d.as ? d.as : d.name;
-	            _this3.rootScope[variableName] = 1;
+	            _this4.rootScope[variableName] = 1;
 	            return '' + d.name + (d.as ? ' as ' + d.as : '');
 	          }).join(', ');
 	          depCode = '{ ' + depCode + ' }';
@@ -567,7 +579,7 @@ webpackJsonp([0,1],[
 	        this.pushState();
 	        var name = attrs.name;
 	
-	        if (pure && countValidChildren(node.children) > 1) {
+	        if (pure && isRenderChildrenArray.call(this, node.children, true)) {
 	          this.throwParseError({ node: node, reason: 'template can only has one render child!' });
 	        }
 	        this.generateCodeForTags(node.children, TOP_LEVEL);
@@ -623,7 +635,7 @@ webpackJsonp([0,1],[
 	        }
 	        Object.keys(attrs).forEach(function (attrName_) {
 	          var attrName = attrName_;
-	          if (_this3.SPECIAL_ATTRS.indexOf(attrName) !== -1) {
+	          if (_this4.SPECIAL_ATTRS.indexOf(attrName) !== -1) {
 	            return;
 	          }
 	          var attrValue = attrs[attrName];
@@ -638,13 +650,13 @@ webpackJsonp([0,1],[
 	            node: node,
 	            attrs: attrs,
 	            transformedAttrs: transformedAttrs,
-	            transformer: _this3
+	            transformer: _this4
 	          };
 	          if (attributeProcessor && attributeProcessor(info) === false) {
 	            return;
 	          }
 	          if (attrValue) {
-	            transformedAttrValue = '{' + _this3.processExpression(attrValue, {
+	            transformedAttrValue = '{' + _this4.processExpression(attrValue, {
 	              node: node,
 	              attrName: attrName
 	            }) + '}';
@@ -679,24 +691,24 @@ webpackJsonp([0,1],[
 	        componentDeps[originalTag] = 1;
 	        var nextLevel = level + 2;
 	        if (Object.keys(transformedAttrs).length) {
-	          _this3.pushCode(level, '<' + tag);
+	          _this4.pushCode(level, '<' + tag);
 	          Object.keys(transformedAttrs).forEach(function (k) {
-	            _this3.pushCode(nextLevel, '' + (startsWith(k, 'data-') ? k : camelCase(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
+	            _this4.pushCode(nextLevel, '' + (startsWith(k, 'data-') ? k : camelCase(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
 	          });
-	          _this3.pushCode(level, '>');
+	          _this4.pushCode(level, '>');
 	        } else {
-	          _this3.pushCode(level, '<' + tag + '>');
+	          _this4.pushCode(level, '<' + tag + '>');
 	        }
 	
 	        if (node.children) {
 	          // new code section start
 	          // <view>{}</view>
-	          _this3.pushCodeSection();
-	          _this3.generateCodeForTags(node.children, nextLevel, false);
-	          _this3.popCodeSection();
+	          _this4.pushCodeSection();
+	          _this4.generateCodeForTags(node.children, nextLevel, false);
+	          _this4.popCodeSection();
 	        }
 	
-	        _this3.pushCode(level, '</' + tag + '>');
+	        _this4.pushCode(level, '</' + tag + '>');
 	      }();
 	
 	      if ((typeof _ret4 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret4)) === "object") return _ret4.v;
