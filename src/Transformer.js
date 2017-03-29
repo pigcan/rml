@@ -550,6 +550,7 @@ ${this.template.slice(startIndex, endIndex)}`;
         const tagProcessRet = tagProcessor({
           attrs,
           transformedAttrs,
+          node,
           tag,
         });
         if (tagProcessRet === false) {
