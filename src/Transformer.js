@@ -33,20 +33,29 @@ function notJsx(c) {
   return tag === 'import-module' || tag === 'import';
 }
 
-function countValidChildren(children = []) {
-  return children.reduce((count, c) => {
+function isRenderChildrenArray(children = [], considerFor) {
+  const totalCount = children.reduce((count, c) => {
     if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
       return count;
     }
     const tag = c.type === 'tag' && c.name;
     if (tag) {
       const attrs = c.attribs || {};
+      // for is array....
+      if (considerFor && attrs[this.FOR_ATTR_NAME]) {
+        return count + 2;
+      }
+      // elseif else not count
+      if (attrs[this.ELIF_ATTR_NAME] || attrs[this.ELSE_ATTR_NAME]) {
+        return count;
+      }
       if (tag === 'import-module' || tag === 'template' && !attrs.is || tag === 'import') {
         return count;
       }
     }
     return count + 1;
   }, 0);
+  return totalCount > 1;
 }
 
 function MLTransformer(template, config_) {
@@ -269,7 +278,8 @@ ${this.template.slice(startIndex, endIndex)}`;
   },
 
   generateCodeForTags(children_, level, arrayForm_) {
-    const arrayForm = arrayForm_ === undefined ? countValidChildren(children_) > 1 : arrayForm_;
+    const arrayForm = arrayForm_ === undefined ?
+      isRenderChildrenArray.call(this, children_) : arrayForm_;
     let children = children_;
     if (children) {
       let i = 0;
@@ -452,7 +462,7 @@ ${this.template.slice(startIndex, endIndex)}`;
       } else {
         this.pushState();
         const { name } = attrs;
-        if (pure && countValidChildren(node.children) > 1) {
+        if (pure && isRenderChildrenArray.call(this, node.children, true)) {
           this.throwParseError({ node, reason: `template can only has one render child!` });
         }
         this.generateCodeForTags(node.children, TOP_LEVEL);
