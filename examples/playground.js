@@ -348,7 +348,8 @@ webpackJsonp([0,1],[
 	  throwParseError: function throwParseError(config) {
 	    var node = config.node,
 	        text = config.text,
-	        attrName = config.attrName;
+	        attrName = config.attrName,
+	        reason = config.reason;
 	
 	    var endIndex = node.endIndex;
 	    var startIndex = node.startIndex;
@@ -358,8 +359,10 @@ webpackJsonp([0,1],[
 	    var error = void 0;
 	    if (attrName) {
 	      error = 'parse tag\'s attribute ' + attrName + ' error: ' + this.template.slice(startIndex, endIndex);
-	    } else {
+	    } else if (text) {
 	      error = 'parse text error: ' + text;
+	    } else {
+	      error = 'parse error: ' + reason + ' : ' + this.template.slice(startIndex, endIndex);
 	    }
 	    var oe = new Error(error);
 	    assign(oe, config, {
@@ -564,6 +567,9 @@ webpackJsonp([0,1],[
 	        this.pushState();
 	        var name = attrs.name;
 	
+	        if (pure && countValidChildren(node.children) > 1) {
+	          this.throwParseError({ node: node, reason: 'template can only has one render child!' });
+	        }
 	        this.generateCodeForTags(node.children, TOP_LEVEL);
 	        subTemplatesCode[name] = this.popState().code;
 	      }
