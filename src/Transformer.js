@@ -132,7 +132,6 @@ assign(MLTransformer.prototype, {
     const {
       importComponent = defaultImportComponent,
       pure,
-      templateMethods = '',
     } = this.config;
 
     const handler = new DomHandler((error, children) => {
@@ -195,9 +194,8 @@ assign(MLTransformer.prototype, {
             const className = name.replace(/-/, '$_$');
             header.push(`
 class $ReactClass_${className} extends React.PureComponent {
-${templateMethods}
   render() {
-    return $ownTemplates$['${name}'].call(this, this.props);
+    return $ownTemplates$['${name}'].call(this.props.children, this.props);
   }
 }
 `);
