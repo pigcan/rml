@@ -13,7 +13,7 @@ describe('MLTransformer', () => {
 <template is="z" />
 `.trim()
       ).transform((err, code) => {
-        expect(code).to.be(`
+        expect(code).to.eql(`
 import React from 'react';
 import assign from 'object-assign';
 import { $ownTemplates$ as $ownTemplates$1 } from './q';
@@ -43,7 +43,7 @@ export default function render(data) {
           `</div>`,
         ].join('\n'), { pure: true }
       ).transform((err, code) => {
-        expect(code).to.be(`
+        expect(code).to.eql(`
 import React from 'react';
 
 let $templates$ = {};
@@ -57,9 +57,8 @@ $ownTemplates$['t'] = function (data) {
 };
 
 class $ReactClass_t extends React.PureComponent {
-
   render() {
-    return $ownTemplates$['t'].call(this, this.props);
+    return $ownTemplates$['t'].call(this.props.children, this.props);
   }
 }
 
@@ -78,6 +77,23 @@ export default function render(data) {
       });
     });
 
+    it('pure only allow one child', (done) => {
+      new MLTransformer(
+        [
+          `<template name="t">`,
+          `<div>{{z}}</div>`,
+          `<div>{{z}}</div>`,
+          `</template>`,
+          `<div>`,
+          `<template is="{{x%2?'t':'z'}}" data="{{...o}}" />`,
+          `</div>`,
+        ].join('\n'), { pure: true }
+      ).transform((err) => {
+        expect(err.message).to
+          .eql(`parse error: template can only has one render child! : <template name="t">`);
+        done();
+      });
+    });
 
     it('support standalone array', (done) => {
       new MLTransformer(
@@ -88,7 +104,7 @@ export default function render(data) {
 <view/>
 `.trim()
       ).transform((err, code) => {
-        expect(code).to.be(`
+        expect(code).to.eql(`
 import React from 'react';
 import assign from 'object-assign';
 import { $ownTemplates$ as $ownTemplates$1 } from './q';
@@ -217,7 +233,7 @@ export default function render(data) {
 <include src="z" />
 `.trim()
       ).transform((err, code) => {
-        expect(code).to.be(`
+        expect(code).to.eql(`
 import React from 'react';
 import $render$1 from './z';
 

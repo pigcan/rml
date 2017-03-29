@@ -236,7 +236,7 @@ class $ReactClass_${className} extends React.PureComponent {
   },
 
   throwParseError(config) {
-    const { node, text, attrName } = config;
+    const { node, text, attrName, reason } = config;
     let endIndex = node.endIndex;
     const startIndex = node.startIndex;
     if (node.children && node.children[0]) {
@@ -246,8 +246,11 @@ class $ReactClass_${className} extends React.PureComponent {
     if (attrName) {
       error = `parse tag's attribute ${attrName} error: \
 ${this.template.slice(startIndex, endIndex)}`;
-    } else {
+    } else if (text) {
       error = `parse text error: ${text}`;
+    } else {
+      error = `parse error: ${reason} : \
+${this.template.slice(startIndex, endIndex)}`;
     }
     const oe = new Error(error);
     assign(oe, config, {
@@ -449,6 +452,9 @@ ${this.template.slice(startIndex, endIndex)}`;
       } else {
         this.pushState();
         const { name } = attrs;
+        if (pure && countValidChildren(node.children) > 1) {
+          this.throwParseError({ node, reason: `template can only has one render child!` });
+        }
         this.generateCodeForTags(node.children, TOP_LEVEL);
         subTemplatesCode[name] = this.popState().code;
       }
