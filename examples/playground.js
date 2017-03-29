@@ -253,9 +253,7 @@ webpackJsonp([0,1],[
 	    var _config = this.config,
 	        _config$importCompone = _config.importComponent,
 	        importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone,
-	        pure = _config.pure,
-	        _config$templateMetho = _config.templateMethods,
-	        templateMethods = _config$templateMetho === undefined ? '' : _config$templateMetho;
+	        pure = _config.pure;
 	
 	
 	    var handler = new DomHandler(function (error, children) {
@@ -314,7 +312,7 @@ webpackJsonp([0,1],[
 	          header.push('};');
 	          if (pure) {
 	            var className = name.replace(/-/, '$_$');
-	            header.push('\nclass $ReactClass_' + className + ' extends React.PureComponent {\n' + templateMethods + '\n  render() {\n    return $ownTemplates$[\'' + name + '\'].call(this, this.props);\n  }\n}\n');
+	            header.push('\nclass $ReactClass_' + className + ' extends React.PureComponent {\n  render() {\n    return $ownTemplates$[\'' + name + '\'].call(this.props.children, this.props);\n  }\n}\n');
 	            header.push('$ownTemplates$[\'' + name + '\'].Component = $ReactClass_' + className + ';');
 	          }
 	        }
