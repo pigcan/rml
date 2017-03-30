@@ -1,6 +1,4 @@
-'use strict';
 
-const expect = require('expect.js');
 const MLTransformer = require('../../src/Transformer');
 
 describe('MLTransformer error', () => {
@@ -12,8 +10,8 @@ describe('MLTransformer error', () => {
       '</div>',
       '</div>',
     ].join('\n')).transform((err, code) => {
-      expect(code).to.be(undefined);
-      expect(err.message).to.be(`parse tag's attribute prop error: <div prop="{{var}}" x="1">`);
+      expect(code).toEqual(undefined);
+      expect(err.message).toMatchSnapshot();
       done();
     });
   });
@@ -24,9 +22,9 @@ describe('MLTransformer error', () => {
       '1',
       '</div>',
     ].join('\n')).transform((err, code) => {
-      expect(code).to.be(undefined);
-      expect(err.startIndex).to.be(0);
-      expect(err.message).to.be(`parse tag's attribute prop error: <div prop="{{var}}" x="1">`);
+      expect(code).toEqual(undefined);
+      expect(err.startIndex).toEqual(0);
+      expect(err.message).toMatchSnapshot();
       done();
     });
   });
@@ -40,8 +38,8 @@ describe('MLTransformer error', () => {
       '</div>',
       '</div>',
     ].join('\n')).transform((err, code) => {
-      expect(code).to.be(undefined);
-      expect(err.message).to.be('parse text error: 12{{var}}34');
+      expect(code).toEqual(undefined);
+      expect(err.message).toMatchSnapshot();
       done();
     });
   });

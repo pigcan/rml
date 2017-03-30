@@ -15,7 +15,7 @@
   "main": "lib/index",
   "dependencies": {
     "babel-generator": "~6.17.0",
-    "babel-runtime": "^6.18.0",
+    "babel-runtime": "^6.23.0",
     "babel-traverse": "~6.16.0",
     "babylon": "~6.11.4",
     "domhandler": "~2.3.0",
@@ -23,10 +23,8 @@
     "object-assign": "4.x"
   },
   "devDependencies": {
-    "coveralls": "^2.11.15",
-    "expect.js": "~0.3.1",
-    "istanbul": "~0.4.5",
-    "mocha": "~3.1.0",
+    "coveralls": "^2.12.0",
+    "jest": "^19.0.2",
     "pre-commit": "~1.1.2",
     "rc-tools": "^5.9.3",
     "react": "^15.4.1",
@@ -36,8 +34,8 @@
     "port": 8011
   },
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha -R list tests/specs",
-    "coverage": "node ./node_modules/istanbul/lib/cli cover ./node_modules/mocha/bin/_mocha -- -R list tests/specs && cat ./coverage/lcov.info | coveralls",
+    "test": "jest",
+    "coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "build": "rc-tools run build",
     "gh-pages": "rc-tools run gh-pages",
     "start": "rc-tools run server",

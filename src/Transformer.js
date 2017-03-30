@@ -145,14 +145,14 @@ assign(MLTransformer.prototype, {
 
     const handler = new DomHandler((error, children) => {
       if (error) {
-        console.error(error);
+        // console.error(error);
         return done(error);
       }
 
       try {
         this.generateCodeForTags(children, TOP_LEVEL);
       } catch (e) {
-        console.error(e);
+        // console.error(e);
         return done(e);
       }
 
@@ -171,7 +171,7 @@ assign(MLTransformer.prototype, {
           }
         });
       } catch (e) {
-        console.error(e);
+        // console.error(e);
         return done(e);
       }
       const subTemplatesName = [];

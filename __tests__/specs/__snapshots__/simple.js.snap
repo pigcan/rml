@@ -1,0 +1,96 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MLTransformer allowImportModule 1`] = `
+"import React from 'react';
+import X from 'y';
+import { Z, Q as Y } from 'y';
+
+export default function render(data) {
+  return (
+    <X
+      value = {(Y)}
+    >
+      <Y>
+      </Y>
+      <Z>
+      </Z>
+    </X>
+  );
+};"
+`;
+
+exports[`MLTransformer allowScript 1`] = `
+"import React from 'react';
+var x = 1;
+
+export default function render(data) {
+  return (
+    <X>
+    </X>
+  );
+};"
+`;
+
+exports[`MLTransformer escape attribute 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <a
+      x = {'\\"\`'}
+    >
+      {'\\"\\\\'\`'}
+    </a>
+  );
+};"
+`;
+
+exports[`MLTransformer support bool attr value 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div
+      checked = {(false)}
+    >
+    </div>
+  );
+};"
+`;
+
+exports[`MLTransformer support ignore attr value 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div
+      checked
+    >
+    </div>
+  );
+};"
+`;
+
+exports[`MLTransformer support simple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div
+      prop = {(data.a + data.b)}
+      x = {1}
+      onClick = {(this.onClick)}
+    >
+      <div>
+        {'1' + (data.a[0].b) + '2'}
+      </div>
+      <div>
+        {1}
+      </div>
+      <div>
+        {1}
+      </div>
+    </div>
+  );
+};"
+`;

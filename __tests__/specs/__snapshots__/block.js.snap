@@ -1,0 +1,176 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`block support block for 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      ((data.a) || []).map((item, index) => {
+        return (
+          <div>
+          </div>
+        );
+      })
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`block support block if 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.a > data.b)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      null
+      )
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`block support block if multiple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.a > data.b)) ?
+      (
+      [
+      <div>
+      </div>
+      ,
+      <div>
+      </div>
+      ,
+      ]
+      )
+      :
+      null
+      )
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`block support if nested 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.c > data.d)) ?
+      (
+      (
+      ((data.a > data.b)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      null
+      )
+      )
+      :
+      null
+      )
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`block support nested block 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    (
+    ((data.z)) ?
+    (
+    <view>
+      {(data.z)}
+    </view>
+    )
+    :
+    null
+    )
+  );
+};"
+`;
+
+exports[`block support root block for 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    ((data.z) || []).map((item, index) => {
+      return (
+        'z\\\\'\\\\\\\\'
+      );
+    })
+  );
+};"
+`;
+
+exports[`block support simple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      <div>
+      </div>
+    </div>
+  );
+};"
+`;
+
+exports[`block support simple multiple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      [
+      <div>
+      </div>
+      ,
+      <div>
+      </div>
+      ,
+      ]
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`block support text 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    (data.x)
+  );
+};"
+`;

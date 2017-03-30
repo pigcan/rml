@@ -1,0 +1,178 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`conditional render support empty else 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.l > 1)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      (
+      (
+      <div>
+      </div>
+      )
+      )
+      )
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`conditional render support full nested 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.l > 1)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      (
+      ((data.l > 2)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      (
+      ((data.l > 3)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      null
+      )
+      )
+      )
+      }
+      <div>
+      </div>
+    </div>
+  );
+};"
+`;
+
+exports[`conditional render support ifs 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.l > 1)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      null
+      )
+      }
+      {
+      (
+      ((data.t > 1)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      null
+      )
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`conditional render support multiple roots 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    [
+    (
+    ('a') ?
+    (
+    1
+    )
+    :
+    null
+    )
+    ,
+    <view>
+    </view>
+    ,
+    ]
+  );
+};"
+`;
+
+exports[`conditional render support simple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.l > 1)) ?
+      (
+      <div>
+      </div>
+      )
+      :
+      null
+      )
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`conditional render support simple nested 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      (
+      ((data.l > 1)) ?
+      (
+      <div>
+        {
+        (
+        ((data.t > 1)) ?
+        (
+        $templates$['x'].call(this, undefined)
+        )
+        :
+        null
+        )
+        }
+      </div>
+      )
+      :
+      null
+      )
+      }
+    </div>
+  );
+};"
+`;

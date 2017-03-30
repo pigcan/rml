@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loop support item 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      ((data.items) || []).map((t, i) => {
+        return (
+          <div
+            key = {t.u}
+          >
+            {(i) + ' - ' + (t) + ' - ' + (data.z)}
+          </div>
+        );
+      })
+      }
+      <div>
+        {(data.i)}
+      </div>
+    </div>
+  );
+};"
+`;
+
+exports[`loop support nested 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      ((data.items) || []).map((outer, index) => {
+        return (
+          <div>
+            {
+            ((outer) || []).map((item, index) => {
+              return (
+                <div>
+                  {(item)}
+                </div>
+              );
+            })
+            }
+          </div>
+        );
+      })
+      }
+    </div>
+  );
+};"
+`;
+
+exports[`loop support root simple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    ('z' || []).map((item, index) => {
+      return (
+        <view>
+          {1}
+        </view>
+      );
+    })
+  );
+};"
+`;
+
+exports[`loop support simple 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <div>
+      {
+      ((data.items) || []).map((item, index) => {
+        return (
+          <div>
+            {(item)}
+          </div>
+        );
+      })
+      }
+      <div>
+        {(data.i)}
+      </div>
+    </div>
+  );
+};"
+`;
