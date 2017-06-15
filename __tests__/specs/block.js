@@ -15,6 +15,36 @@ describe('block', () => {
     });
   });
 
+  it('allow empty for', (done) => {
+    new MLTransformer(`
+<block r:for="{{x}}"></block>
+`).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
+  it('allow empty', (done) => {
+    new MLTransformer(`
+<block></block>
+`).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
+  it('allow empty in array', (done) => {
+    new MLTransformer(`
+<view>
+<block></block>
+</view>
+<block></block>
+`).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
   it('support text', (done) => {
     new MLTransformer([
       `<block>`,

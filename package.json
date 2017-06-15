@@ -1,7 +1,7 @@
 {
   "name": "rml",
   "description": "An alternate markup language to react jsx",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "keywords": [
     "react",
     "jsx"
@@ -10,9 +10,11 @@
   "homepage": "http://github.com/yiminghe/rml",
   "author": "yiminghe@gmail.com",
   "files": [
-    "lib"
+    "lib",
+    "es"
   ],
-  "main": "lib/index",
+  "main": "./lib/index",
+  "module": "./es/index",
   "dependencies": {
     "babel-generator": "~6.17.0",
     "babel-runtime": "^6.23.0",
@@ -24,14 +26,22 @@
   },
   "devDependencies": {
     "coveralls": "^2.12.0",
-    "jest": "^19.0.2",
+    "jest": "20.x",
     "pre-commit": "~1.1.2",
-    "rc-tools": "^5.9.3",
+    "rc-tools": "6.x",
     "react": "^15.4.1",
     "react-dom": "^15.4.1"
   },
   "config": {
     "port": 8011
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/*"
+    ],
+    "transform": {
+      "\\.jsx?$": "./node_modules/rc-tools/scripts/jestPreprocessor.js"
+    }
   },
   "scripts": {
     "test": "jest",

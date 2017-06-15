@@ -1,5 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`block allow empty 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+null
+  );
+};"
+`;
+
+exports[`block allow empty for 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    ((data.x) || []).map((item, index) => {
+      return (
+        null
+      );
+    })
+  );
+};"
+`;
+
+exports[`block allow empty in array 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    [
+    <view>
+    </view>
+    ,
+    null,
+    ]
+  );
+};"
+`;
+
 exports[`block support block for 1`] = `
 "import React from 'react';
 

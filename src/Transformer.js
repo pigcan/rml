@@ -21,16 +21,16 @@ function defaultImportComponent() {
   return false;
 }
 
-function isTopLevel(level) {
-  return level === 4;
-}
-
 function notJsx(c) {
   if (c.type === 'script') {
     return true;
   }
   const tag = c.type === 'tag' && c.name;
   return tag === 'import-module' || tag === 'import';
+}
+
+function isTopLevel(level) {
+  return level === 4;
 }
 
 function isRenderChildrenArray(children = [], considerFor) {
@@ -96,13 +96,19 @@ function MLTransformer(template, config_) {
 }
 
 assign(MLTransformer.prototype, {
-  isStartOfCodeSection(level, preCalculate) {
+  isStartOfCodeSection(level, preCalculate, justCheck) {
+    if (justCheck) {
+      return (this.codeDepth[this.codeDepth.length - 1] + 1) === 1 && !isTopLevel(level);
+    }
     if (preCalculate) {
       return ++this.codeDepth[this.codeDepth.length - 1] === 1 && !isTopLevel(level);
     }
     return !isTopLevel(level) && ++this.codeDepth[this.codeDepth.length - 1] === 1;
   },
-  isEndOfCodeSection(level, preCalculate) {
+  isEndOfCodeSection(level, preCalculate, justCheck) {
+    if (justCheck) {
+      return (this.codeDepth[this.codeDepth.length - 1] - 1) === 0 && !isTopLevel(level);
+    }
     if (preCalculate) {
       return --this.codeDepth[this.codeDepth.length - 1] === 0 && !isTopLevel(level);
     }
@@ -281,11 +287,13 @@ ${this.template.slice(startIndex, endIndex)}`;
     const arrayForm = arrayForm_ === undefined ?
       isRenderChildrenArray.call(this, children_) : arrayForm_;
     let children = children_;
-    if (children) {
+    if (children && children.length) {
       let i = 0;
       children = children.filter(c => !(c.type === 'text' && !c.data.trim()));
       const l = children.length;
-
+      if (!l) {
+        return;
+      }
       const transformIf = (c, attrName) => {
         const attrs = c.attribs;
         if (attrs && attrName in attrs) {
@@ -340,15 +348,22 @@ ${this.template.slice(startIndex, endIndex)}`;
         }
         this.pushCode(level, '[');
       }
+
       for (; i < l; i += 1) {
         const child = children[i];
+        const currentCodeLength = this.code.length;
         if (!transformIf(child, this.IF_ATTR_NAME)) {
           this.generateCodeForTag(child, level);
         }
         if (arrayForm && !notJsx(child)) {
-          this.pushCode(level, ',');
+          if (this.code.length === currentCodeLength) {
+            this.pushCode(level, 'null,');
+          } else {
+            this.pushCode(level, ',');
+          }
         }
       }
+
       if (arrayForm) {
         this.pushCode(level, ']');
         if (this.isEndOfCodeSection(level, true)) {
@@ -600,7 +615,11 @@ ${this.template.slice(startIndex, endIndex)}`;
       this.pushCode(level, `</${tag}>`);
     } else if (node.children) {
       // block will not emit any tag, so reuse current code section
+      const currentCodeLength = this.code.length;
       this.generateCodeForTags(node.children, level);
+      if (inFor && this.code.length === currentCodeLength) {
+        this.pushCode(level, 'null');
+      }
     }
 
     if (inFor) {
