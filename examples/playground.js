@@ -32251,7 +32251,7 @@ assign(MLTransformer.prototype, {
       if (Object.keys(transformedAttrs).length) {
         this.pushCode(level, '<' + tag);
         Object.keys(transformedAttrs).forEach(function (k) {
-          _this4.pushCode(nextLevel, '' + (startsWith(k, 'data-') ? k : camelCase(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
+          _this4.pushCode(nextLevel, '' + (startsWith(k, 'data-') || startsWith(k, 'aria-') ? k : camelCase(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
         });
         this.pushCode(level, '>');
       } else {
