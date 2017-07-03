@@ -2,6 +2,19 @@
 const MLTransformer = require('../../src/Transformer');
 
 describe('MLTransformer', () => {
+  it('style/className/class can not be bool', (done) => {
+    new MLTransformer(
+      `
+<a style/>
+<a class/>
+<a className/>
+`.trim()
+    ).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
   it('escape attribute', (done) => {
     new MLTransformer(
       `

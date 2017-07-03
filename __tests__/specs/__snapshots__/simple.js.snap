@@ -45,6 +45,26 @@ export default function render(data) {
 };"
 `;
 
+exports[`MLTransformer style/className/class can not be bool 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    [
+    <a>
+    </a>
+    ,
+    <a>
+    </a>
+    ,
+    <a>
+    </a>
+    ,
+    ]
+  );
+};"
+`;
+
 exports[`MLTransformer support bool attr value 1`] = `
 "import React from 'react';
 

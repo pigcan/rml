@@ -570,6 +570,10 @@ ${this.template.slice(startIndex, endIndex)}`;
         if (attrName === 'class') {
           attrName = 'className';
         }
+        if ((attrName === 'className' || attrName === 'style') &&
+          !transformedAttrValue) {
+          return;
+        }
         if (transformedAttrValue !== undefined) {
           transformedAttrs[attrName] = transformedAttrValue;
         }
