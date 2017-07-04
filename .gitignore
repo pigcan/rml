@@ -26,3 +26,5 @@ coverage
 tests/manual/integrate/alipay
 build/
 yarn.lock
+/lib/
+/es/
