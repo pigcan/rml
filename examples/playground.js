@@ -11035,12 +11035,20 @@ function StringLiteral(node, parent) {
 
 /***/ }),
 /* 108 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = isNumber;
+/* harmony export (immutable) */ __webpack_exports__["b"] = padding;
+/* harmony export (immutable) */ __webpack_exports__["d"] = startsWith;
+/* unused harmony export relative */
+/* harmony export (immutable) */ __webpack_exports__["e"] = camelCase;
+/* harmony export (immutable) */ __webpack_exports__["c"] = transformAbsoluteToRelative;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_path__ = __webpack_require__(591);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_path___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_path__);
 
 
-var path = __webpack_require__(591);
+
 
 var numberReSnippet = '(?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity))';
 var matchOnlyNumberRe = new RegExp('^(' + numberReSnippet + ')$');
@@ -11058,7 +11066,7 @@ function startsWith(str, prefix) {
 }
 
 function relative(from_, to) {
-  var my = path.relative(path.dirname(from_), to);
+  var my = __WEBPACK_IMPORTED_MODULE_0_path___default.a.relative(__WEBPACK_IMPORTED_MODULE_0_path___default.a.dirname(from_), to);
   if (!startsWith(my, './') && !startsWith(my, '../')) {
     return './' + my;
   }
@@ -11071,30 +11079,21 @@ function camelCase(name) {
   });
 }
 
-function transformAbsoluteToRelative(projectRoot, filepath, absolutePath) {
+function transformAbsoluteToRelative(projectRoot, filepath, absolutePath, allowImportModule) {
   var retPath = absolutePath;
   var firstChar = retPath.charAt(0);
-  if (firstChar === '.') {
-    return retPath;
-  }
   if (firstChar === '/') {
-    var srcDir = path.dirname(filepath.slice(projectRoot.length));
-    retPath = path.relative(srcDir, retPath);
+    var srcDir = __WEBPACK_IMPORTED_MODULE_0_path___default.a.dirname(filepath.slice(projectRoot.length));
+    retPath = __WEBPACK_IMPORTED_MODULE_0_path___default.a.relative(srcDir, retPath);
+  }
+  if (allowImportModule) {
+    return retPath;
   }
   if (!startsWith(retPath, './') && !startsWith(retPath, '../')) {
     return './' + retPath;
   }
   return retPath;
 }
-
-module.exports = {
-  camelCase: camelCase,
-  startsWith: startsWith,
-  transformAbsoluteToRelative: transformAbsoluteToRelative,
-  relative: relative,
-  padding: padding,
-  isNumber: isNumber
-};
 
 /***/ }),
 /* 109 */
@@ -18480,9 +18479,12 @@ function needsParens(node, parent, printStack) {
 
 /***/ }),
 /* 176 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["b"] = transformExpression;
+/* unused harmony export hasExpression */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(108);
 
 
 // not allow {{x:{y:1}}}
@@ -18490,11 +18492,14 @@ function needsParens(node, parent, printStack) {
 // const util = require('util');
 
 var babylon = __webpack_require__(132);
-var traverse = __webpack_require__(49)['default'];
-var generate = __webpack_require__(292)['default'];
+var traverse = __webpack_require__(49);
+var generate = __webpack_require__(292);
 
-var _require = __webpack_require__(108),
-    isNumber = _require.isNumber;
+babylon = babylon['default'] || babylon;
+traverse = traverse['default'] || traverse;
+generate = generate['default'] || generate;
+
+
 
 var expressionTagReg = /\{\{([^}]+)\}\}/g;
 var fullExpressionTagReg = /^\{\{([^}]+)\}\}$/;
@@ -18565,7 +18570,7 @@ function transformExpressionByPart(str_, scope, config) {
   }
   var str = str_.trim();
   if (!str.match(expressionTagReg)) {
-    return [isNumber(str) ? str : '\'' + escapeString(str_) + '\''];
+    return [__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* isNumber */])(str) ? str : '\'' + escapeString(str_) + '\''];
   }
   var match = str.match(fullExpressionTagReg);
   if (match) {
@@ -18596,11 +18601,9 @@ function transformExpression(str_, scope) {
   return transformExpressionByPart(str_, scope, config).join(' + ');
 }
 
-exports.transformExpression = transformExpression;
-
-exports.hasExpression = function hasExpression(str) {
+function hasExpression(str) {
   return str.match(expressionTagReg);
-};
+}
 
 /***/ }),
 /* 177 */
@@ -22145,7 +22148,7 @@ Tokenizer.prototype._emitPartial = function(value){
 module.exports = Stream;
 
 var Parser = __webpack_require__(202),
-    WritableStream = __webpack_require__(695).Writable || __webpack_require__(704).Writable,
+    WritableStream = __webpack_require__(695).Writable || __webpack_require__(703).Writable,
     StringDecoder = __webpack_require__(173).StringDecoder,
     Buffer = __webpack_require__(87).Buffer;
 
@@ -26463,7 +26466,7 @@ util.inherits = __webpack_require__(22);
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = __webpack_require__(705);
+var debugUtil = __webpack_require__(704);
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -28252,6 +28255,7 @@ var Page = __WEBPACK_IMPORTED_MODULE_1_react___default.a.createClass({
     }).transform(function (err, code) {
       if (err) {
         alert(err);
+        console.log(err);
       }
       ret = code;
     });
@@ -31670,28 +31674,28 @@ module.exports = __webpack_require__(300);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(process, module) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_helpers_defineProperty__ = __webpack_require__(313);
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_helpers_defineProperty__ = __webpack_require__(313);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_helpers_defineProperty___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_babel_runtime_helpers_defineProperty__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_object_assign__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_object_assign___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_object_assign__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_htmlparser2__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_htmlparser2___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_htmlparser2__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_domhandler__ = __webpack_require__(193);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_domhandler___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_domhandler__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__expression__ = __webpack_require__(176);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(108);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__processImportComponent__ = __webpack_require__(301);
 
 
 
-var assign = __webpack_require__(6);
-var htmlparser = __webpack_require__(65);
-var DomHandler = __webpack_require__(193);
 
-var _require = __webpack_require__(176),
-    transformExpression = _require.transformExpression;
 
-var utils = __webpack_require__(108);
-var processImportComponent = __webpack_require__(301);
+
+
+
+
 
 var IMPORT = 'import';
-var camelCase = utils.camelCase,
-    padding = utils.padding,
-    startsWith = utils.startsWith,
-    transformAbsoluteToRelative = utils.transformAbsoluteToRelative;
-
 var cwd = process.cwd();
 var TOP_LEVEL = 4;
 var HEADER = 'export default function render(data) {';
@@ -31772,7 +31776,7 @@ function MLTransformer(template, config_) {
   this.codeDepth = [0];
 }
 
-assign(MLTransformer.prototype, {
+__WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
   isStartOfCodeSection: function isStartOfCodeSection(level, preCalculate, justCheck) {
     if (justCheck) {
       return this.codeDepth[this.codeDepth.length - 1] + 1 === 1 && !isTopLevel(level);
@@ -31830,7 +31834,7 @@ assign(MLTransformer.prototype, {
         pure = _config.pure;
 
 
-    var handler = new DomHandler(function (error, children) {
+    var handler = new __WEBPACK_IMPORTED_MODULE_3_domhandler___default.a(function (error, children) {
       if (error) {
         // console.error(error);
         return done(error);
@@ -31907,17 +31911,17 @@ assign(MLTransformer.prototype, {
       withStartIndices: true,
       withEndIndices: true
     });
-    var parser = new htmlparser.Parser(handler, {
+    var parser = new __WEBPACK_IMPORTED_MODULE_2_htmlparser2___default.a.Parser(handler, {
       xmlMode: true
     });
     parser.write(this.template);
     parser.done();
   },
   pushCode: function pushCode(level, str) {
-    this.code.push(padding(level, str));
+    this.code.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* padding */])(level, str));
   },
   pushHeaderCode: function pushHeaderCode(level, str) {
-    this.header.push(padding(level, str));
+    this.header.push(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["b" /* padding */])(level, str));
   },
   throwParseError: function throwParseError(config) {
     var node = config.node,
@@ -31932,14 +31936,14 @@ assign(MLTransformer.prototype, {
     }
     var error = void 0;
     if (attrName) {
-      error = 'parse tag\'s attribute ' + attrName + ' error: ' + this.template.slice(startIndex, endIndex);
+      error = 'parse tag\'s attribute `' + attrName + '` error: ' + this.template.slice(startIndex, endIndex);
     } else if (text) {
       error = 'parse text error: ' + text;
     } else {
       error = 'parse error: ' + reason + ' : ' + this.template.slice(startIndex, endIndex);
     }
     var oe = new Error(error);
-    assign(oe, config, {
+    __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(oe, config, {
       startIndex: startIndex,
       endIndex: endIndex
     });
@@ -31947,8 +31951,9 @@ assign(MLTransformer.prototype, {
   },
   processExpression: function processExpression(exp, config) {
     try {
-      return transformExpression(exp, this.scope, config);
+      return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__expression__["b" /* transformExpression */])(exp, this.scope, config);
     } catch (e) {
+      console.error(e);
       this.throwParseError(config);
     }
   },
@@ -32096,8 +32101,9 @@ assign(MLTransformer.prototype, {
       if (allowImportModule) {
         var deps = void 0;
         try {
-          deps = attrs.name && processImportComponent(attrs.name);
+          deps = attrs.name && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__processImportComponent__["a" /* default */])(attrs.name);
         } catch (e) {
+          console.error(e);
           this.throwParseError({
             node: node,
             attrName: 'name'
@@ -32150,13 +32156,13 @@ assign(MLTransformer.prototype, {
     }
 
     if (tag === 'import') {
-      var importPath = transformAbsoluteToRelative(projectRoot, renderPath, attrs.src);
+      var importPath = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["c" /* transformAbsoluteToRelative */])(projectRoot, renderPath, attrs.src, allowImportModule);
       importTplDeps[importPath] = importTplDeps[importPath] || this.importIncludeIndex++;
       return;
     }
 
     if (tag === 'include') {
-      var includePath = transformAbsoluteToRelative(projectRoot, renderPath, attrs.src);
+      var includePath = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["c" /* transformAbsoluteToRelative */])(projectRoot, renderPath, attrs.src, allowImportModule);
       includeTplDeps[includePath] = includeTplDeps[includePath] || this.importIncludeIndex++;
       this.pushCode(level, (this.isStartOfCodeSection(level) ? '{ ' : '') + '$render$' + includeTplDeps[includePath] + '.apply(this, arguments)' + (this.isEndOfCodeSection(level) ? ' }' : ''));
       return;
@@ -32254,7 +32260,7 @@ assign(MLTransformer.prototype, {
       if (Object.keys(transformedAttrs).length) {
         this.pushCode(level, '<' + tag);
         Object.keys(transformedAttrs).forEach(function (k) {
-          _this4.pushCode(nextLevel, '' + (startsWith(k, 'data-') || startsWith(k, 'aria-') ? k : camelCase(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
+          _this4.pushCode(nextLevel, '' + (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["d" /* startsWith */])(k, 'data-') || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["d" /* startsWith */])(k, 'aria-') ? k : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__utils__["e" /* camelCase */])(k)) + (transformedAttrs[k] ? ' = ' + transformedAttrs[k] : ''));
         });
         this.pushCode(level, '>');
       } else {
@@ -32294,33 +32300,42 @@ assign(MLTransformer.prototype, {
   }
 });
 
-module.exports = MLTransformer;
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0), __webpack_require__(703)(module)))
+/* harmony default export */ __webpack_exports__["a"] = (MLTransformer);
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
 /* 300 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-module.exports = {
-  Transformer: __webpack_require__(299),
-  expression: __webpack_require__(176)
-};
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Transformer__ = __webpack_require__(299);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__expression__ = __webpack_require__(176);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Transformer", function() { return __WEBPACK_IMPORTED_MODULE_0__Transformer__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "expression", function() { return __WEBPACK_IMPORTED_MODULE_1__expression__["default"]; });
+
+
+
+
 
 /***/ }),
 /* 301 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = processImport;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils__ = __webpack_require__(108);
 
 
-var _require = __webpack_require__(108),
-    startsWith = _require.startsWith;
 
 var babylon = __webpack_require__(132);
-var traverse = __webpack_require__(49)['default'];
+var traverse = __webpack_require__(49);
 
-module.exports = function processImport(dep) {
-  if (startsWith(dep, '{')) {
+babylon = babylon['default'] || babylon;
+traverse = traverse['default'] || traverse;
+
+function processImport(dep) {
+  if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils__["d" /* startsWith */])(dep, '{')) {
     var ret = [];
     var visitor = {
       noScope: 1,
@@ -32343,7 +32358,7 @@ module.exports = function processImport(dep) {
     return ret;
   }
   return dep;
-};
+}
 
 /***/ }),
 /* 302 */
@@ -69606,31 +69621,7 @@ function hasOwnProperty(obj, prop) {
 /* 703 */
 /***/ (function(module, exports) {
 
-module.exports = function(originalModule) {
-	if(!originalModule.webpackPolyfill) {
-		var module = Object.create(originalModule);
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		Object.defineProperty(module, "exports", {
-			enumerable: true,
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
+/* (ignored) */
 
 /***/ }),
 /* 704 */
@@ -69640,17 +69631,11 @@ module.exports = function(originalModule) {
 
 /***/ }),
 /* 705 */
-/***/ (function(module, exports) {
-
-/* (ignored) */
-
-/***/ }),
-/* 706 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(279);
 
 
 /***/ })
-],[706]);
+],[705]);
 //# sourceMappingURL=playground.js.map
