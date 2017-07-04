@@ -3,10 +3,15 @@
 // not allow {{x:{y:1}}}
 // or use complex parser
 // const util = require('util');
-const babylon = require('babylon');
-const traverse = require('babel-traverse').default;
-const generate = require('babel-generator').default;
-const { isNumber } = require('./utils');
+let babylon = require('babylon');
+let traverse = require('babel-traverse');
+let generate = require('babel-generator');
+
+babylon = babylon.default || babylon;
+traverse = traverse.default || traverse;
+generate = generate.default || generate;
+
+import { isNumber } from './utils';
 
 const expressionTagReg = /\{\{([^}]+)\}\}/g;
 const fullExpressionTagReg = /^\{\{([^}]+)\}\}$/;
@@ -111,12 +116,10 @@ function transformExpressionByPart(str_, scope, config) {
   return gen;
 }
 
-function transformExpression(str_, scope, config = {}) {
+export function transformExpression(str_, scope, config = {}) {
   return transformExpressionByPart(str_, scope, config).join(' + ');
 }
 
-exports.transformExpression = transformExpression;
-
-exports.hasExpression = function hasExpression(str) {
+export function hasExpression(str) {
   return str.match(expressionTagReg);
-};
+}

@@ -30,6 +30,7 @@ const Page = React.createClass({
     }).transform((err, code) => {
       if (err) {
         alert(err);
+        console.log(err);
       }
       ret = code;
     });

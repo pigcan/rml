@@ -1,18 +1,17 @@
 'use strict';
 
-const assign = require('object-assign');
-const htmlparser = require('htmlparser2');
-const DomHandler = require('domhandler');
-const { transformExpression } = require('./expression');
-const utils = require('./utils');
-const processImportComponent = require('./processImportComponent');
-
-const IMPORT = 'import';
-const {
+import assign from 'object-assign';
+import htmlparser from 'htmlparser2';
+import DomHandler from 'domhandler';
+import { transformExpression } from './expression';
+import {
   camelCase,
   padding, startsWith,
   transformAbsoluteToRelative,
-} = utils;
+} from './utils';
+import processImportComponent from './processImportComponent';
+
+const IMPORT = 'import';
 const cwd = process.cwd();
 const TOP_LEVEL = 4;
 const HEADER = `export default function render(data) {`;
@@ -259,7 +258,7 @@ class $ReactClass_${className} extends React.PureComponent {
     }
     let error;
     if (attrName) {
-      error = `parse tag's attribute ${attrName} error: \
+      error = `parse tag's attribute \`${attrName}\` error: \
 ${this.template.slice(startIndex, endIndex)}`;
     } else if (text) {
       error = `parse text error: ${text}`;
@@ -279,6 +278,7 @@ ${this.template.slice(startIndex, endIndex)}`;
     try {
       return transformExpression(exp, this.scope, config);
     } catch (e) {
+      console.error(e);
       this.throwParseError(config);
     }
   },
@@ -428,6 +428,7 @@ ${this.template.slice(startIndex, endIndex)}`;
         try {
           deps = attrs.name && processImportComponent(attrs.name);
         } catch (e) {
+          console.error(e);
           this.throwParseError({
             node,
             attrName: 'name',
@@ -487,14 +488,16 @@ ${this.template.slice(startIndex, endIndex)}`;
     }
 
     if (tag === 'import') {
-      const importPath = transformAbsoluteToRelative(projectRoot, renderPath, attrs.src);
+      const importPath = transformAbsoluteToRelative(projectRoot,
+        renderPath, attrs.src, allowImportModule);
       importTplDeps[importPath] = importTplDeps[importPath] ||
         (this.importIncludeIndex++);
       return;
     }
 
     if (tag === 'include') {
-      const includePath = transformAbsoluteToRelative(projectRoot, renderPath, attrs.src);
+      const includePath = transformAbsoluteToRelative(projectRoot,
+        renderPath, attrs.src, allowImportModule);
       includeTplDeps[includePath] = includeTplDeps[includePath] ||
         (this.importIncludeIndex++);
       this.pushCode(level, `${
@@ -641,4 +644,4 @@ ${this.template.slice(startIndex, endIndex)}`;
   },
 });
 
-module.exports = MLTransformer;
+export default MLTransformer;
