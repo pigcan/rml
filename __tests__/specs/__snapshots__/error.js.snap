@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MLTransformer error report on attribute 1`] = `"parse tag's attribute prop error: <div prop=\\"{{var}}\\" x=\\"1\\">"`;
+exports[`MLTransformer error report on attribute 1`] = `"parse tag's attribute \`prop\` error: <div prop=\\"{{var}}\\" x=\\"1\\">"`;
 
-exports[`MLTransformer error report on attribute with text as child 1`] = `"parse tag's attribute prop error: <div prop=\\"{{var}}\\" x=\\"1\\">"`;
+exports[`MLTransformer error report on attribute with text as child 1`] = `"parse tag's attribute \`prop\` error: <div prop=\\"{{var}}\\" x=\\"1\\">"`;
 
 exports[`MLTransformer error report on text node 1`] = `"parse text error: 12{{var}}34"`;
