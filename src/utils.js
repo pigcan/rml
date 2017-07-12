@@ -17,14 +17,6 @@ export function startsWith(str, prefix) {
   return str.slice(0, prefix.length) === prefix;
 }
 
-export function relative(from_, to) {
-  const my = path.relative(path.dirname(from_), to);
-  if (!startsWith(my, './') && !startsWith(my, '../')) {
-    return `./${my}`;
-  }
-  return my;
-}
-
 export function camelCase(name) {
   return name.replace(/-(\w)/g, (w, g) => g.toUpperCase());
 }

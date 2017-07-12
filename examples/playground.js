@@ -1,3 +1,6 @@
+/* eslint no-console:0 */
+/* eslint no-alert:0 */
+
 import { Transformer } from 'rml';
 import React from 'react';
 import ReactDOM from 'react-dom';
