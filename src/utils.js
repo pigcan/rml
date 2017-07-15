@@ -23,19 +23,12 @@ export function camelCase(name) {
 
 export function transformAbsoluteToRelative(projectRoot,
                                             filepath,
-                                            absolutePath,
-                                            allowImportModule) {
+                                            absolutePath) {
   let retPath = absolutePath;
   const firstChar = retPath.charAt(0);
   if (firstChar === '/') {
     const srcDir = path.dirname(filepath.slice(projectRoot.length));
     retPath = path.relative(srcDir, retPath);
-  }
-  if (allowImportModule) {
-    return retPath;
-  }
-  if (!startsWith(retPath, './') && !startsWith(retPath, '../')) {
-    return `./${retPath}`;
   }
   return retPath;
 }
