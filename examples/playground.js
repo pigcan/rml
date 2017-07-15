@@ -11041,7 +11041,6 @@ function StringLiteral(node, parent) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = isNumber;
 /* harmony export (immutable) */ __webpack_exports__["b"] = padding;
 /* harmony export (immutable) */ __webpack_exports__["d"] = startsWith;
-/* unused harmony export relative */
 /* harmony export (immutable) */ __webpack_exports__["e"] = camelCase;
 /* harmony export (immutable) */ __webpack_exports__["c"] = transformAbsoluteToRelative;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_path__ = __webpack_require__(591);
@@ -11065,32 +11064,18 @@ function startsWith(str, prefix) {
   return str.slice(0, prefix.length) === prefix;
 }
 
-function relative(from_, to) {
-  var my = __WEBPACK_IMPORTED_MODULE_0_path___default.a.relative(__WEBPACK_IMPORTED_MODULE_0_path___default.a.dirname(from_), to);
-  if (!startsWith(my, './') && !startsWith(my, '../')) {
-    return './' + my;
-  }
-  return my;
-}
-
 function camelCase(name) {
   return name.replace(/-(\w)/g, function (w, g) {
     return g.toUpperCase();
   });
 }
 
-function transformAbsoluteToRelative(projectRoot, filepath, absolutePath, allowImportModule) {
+function transformAbsoluteToRelative(projectRoot, filepath, absolutePath) {
   var retPath = absolutePath;
   var firstChar = retPath.charAt(0);
   if (firstChar === '/') {
     var srcDir = __WEBPACK_IMPORTED_MODULE_0_path___default.a.dirname(filepath.slice(projectRoot.length));
     retPath = __WEBPACK_IMPORTED_MODULE_0_path___default.a.relative(srcDir, retPath);
-  }
-  if (allowImportModule) {
-    return retPath;
-  }
-  if (!startsWith(retPath, './') && !startsWith(retPath, '../')) {
-    return './' + retPath;
   }
   return retPath;
 }
@@ -28235,6 +28220,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_dom__ = __webpack_require__(594);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react_dom__);
+/* eslint no-console:0 */
+/* eslint no-alert:0 */
+
 
 
 
@@ -31685,6 +31673,8 @@ module.exports = __webpack_require__(300);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__expression__ = __webpack_require__(176);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils__ = __webpack_require__(108);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__processImportComponent__ = __webpack_require__(301);
+/* eslint no-console:0 */
+
 
 
 
@@ -31850,10 +31840,6 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
       if (!code.length) {
         code.push('null');
       }
-
-      if (Object.keys(importTplDeps).length) {
-        header.push('import assign from \'object-assign\';');
-      }
       try {
         Object.keys(componentDeps).forEach(function (dep) {
           var importStatement = importComponent(dep);
@@ -31896,7 +31882,7 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         }
       });
       if (Object.keys(importTplDeps).length) {
-        header.push('$templates$ = assign($templates$, ' + (subTemplatesName.join(' ,') + ', $ownTemplates$);'));
+        header.push('$templates$ = Object.assign($templates$, ' + (subTemplatesName.join(' ,') + ', $ownTemplates$);'));
       } else if (needTemplate) {
         header.push('$templates$ = $ownTemplates$;');
       }
