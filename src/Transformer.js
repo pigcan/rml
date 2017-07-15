@@ -166,10 +166,6 @@ assign(MLTransformer.prototype, {
       if (!code.length) {
         code.push('null');
       }
-
-      if (Object.keys(importTplDeps).length) {
-        header.push(`import assign from 'object-assign';`);
-      }
       try {
         Object.keys(componentDeps).forEach((dep) => {
           const importStatement = importComponent(dep);
@@ -220,7 +216,7 @@ class $ReactClass_${className} extends React.PureComponent {
         }
       });
       if (Object.keys(importTplDeps).length) {
-        header.push(`$templates$ = assign($templates$, ` +
+        header.push(`$templates$ = Object.assign($templates$, ` +
           `${subTemplatesName.join(' ,')}, $ownTemplates$);`);
       } else if (needTemplate) {
         header.push(`$templates$ = $ownTemplates$;`);

@@ -5,6 +5,7 @@ describe('MLTransformer', () => {
     it('support standalone', (done) => {
       new MLTransformer(
         `
+<import src='./q' />
 <import src='q' />
 <import-module name="x" from="y" />
 <template is="z" />
@@ -52,6 +53,7 @@ describe('MLTransformer', () => {
       new MLTransformer(
         `
 <import src='q' />
+<import src='./q' />
 <import-module name="x" from="y" />
 <template is="z" />
 <view/>
@@ -79,6 +81,7 @@ describe('MLTransformer', () => {
     it('support import', (done) => {
       new MLTransformer([
         `<import src="a.rml" />`,
+        `<import src="./a.rml" />`,
         `<template name="t">`,
         `<div>{{z}}</div>`,
         `</template>`,
@@ -110,6 +113,7 @@ describe('MLTransformer', () => {
         `
 <import-module name="x" from="y" />
 <include src="z" />
+<include src="./z" />
 `.trim()
       ).transform((err, code) => {
         expect(code).toMatchSnapshot();

@@ -1,6 +1,11 @@
 # History
 ----
 
+## 0.5.0 / 2017-07-15
+
+- use Object.assign
+- do not modify import/include src="x/y"
+
 ## 0.4.9 / 2017-03-28
 
 - use React.PureComponent for `<template>` at pure mode

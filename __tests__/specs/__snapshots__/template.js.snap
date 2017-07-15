@@ -2,7 +2,7 @@
 
 exports[`MLTransformer include support simple 1`] = `
 "import React from 'react';
-import $render$1 from './a.rml';
+import $render$1 from 'a.rml';
 
 export default function render(data) {
   return (
@@ -15,11 +15,17 @@ export default function render(data) {
 
 exports[`MLTransformer include support standalone 1`] = `
 "import React from 'react';
-import $render$1 from './z';
+import $render$1 from 'z';
+import $render$2 from './z';
 
 export default function render(data) {
   return (
+    [
     $render$1.apply(this, arguments)
+    ,
+    $render$2.apply(this, arguments)
+    ,
+    ]
   );
 };"
 `;
@@ -28,8 +34,8 @@ exports[`MLTransformer template pure only allow one child 1`] = `"parse error: t
 
 exports[`MLTransformer template support import 1`] = `
 "import React from 'react';
-import assign from 'object-assign';
-import { $ownTemplates$ as $ownTemplates$1 } from './a.rml';
+import { $ownTemplates$ as $ownTemplates$1 } from 'a.rml';
+import { $ownTemplates$ as $ownTemplates$2 } from './a.rml';
 
 let $templates$ = {};
 export const $ownTemplates$ = {};
@@ -40,7 +46,7 @@ $ownTemplates$['t'] = function (data) {
     </div>
   );
 };
-$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);
+$templates$ = Object.assign($templates$, $ownTemplates$1 ,$ownTemplates$2, $ownTemplates$);
 export default function render(data) {
   return (
     <div>
@@ -52,12 +58,11 @@ export default function render(data) {
 
 exports[`MLTransformer template support import absolute 1`] = `
 "import React from 'react';
-import assign from 'object-assign';
 import { $ownTemplates$ as $ownTemplates$1 } from '../../a.rml';
 
 let $templates$ = {};
 export const $ownTemplates$ = {};
-$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);
+$templates$ = Object.assign($templates$, $ownTemplates$1, $ownTemplates$);
 export default function render(data) {
   return (
 null
@@ -119,12 +124,12 @@ export default function render(data) {
 
 exports[`MLTransformer template support standalone 1`] = `
 "import React from 'react';
-import assign from 'object-assign';
 import { $ownTemplates$ as $ownTemplates$1 } from './q';
+import { $ownTemplates$ as $ownTemplates$2 } from 'q';
 
 let $templates$ = {};
 export const $ownTemplates$ = {};
-$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);
+$templates$ = Object.assign($templates$, $ownTemplates$1 ,$ownTemplates$2, $ownTemplates$);
 export default function render(data) {
   return (
     $templates$['z'].call(this, undefined)
@@ -134,12 +139,12 @@ export default function render(data) {
 
 exports[`MLTransformer template support standalone array 1`] = `
 "import React from 'react';
-import assign from 'object-assign';
-import { $ownTemplates$ as $ownTemplates$1 } from './q';
+import { $ownTemplates$ as $ownTemplates$1 } from 'q';
+import { $ownTemplates$ as $ownTemplates$2 } from './q';
 
 let $templates$ = {};
 export const $ownTemplates$ = {};
-$templates$ = assign($templates$, $ownTemplates$1, $ownTemplates$);
+$templates$ = Object.assign($templates$, $ownTemplates$1 ,$ownTemplates$2, $ownTemplates$);
 export default function render(data) {
   return (
     [
