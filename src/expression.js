@@ -6,7 +6,9 @@
 let babylon = require('babylon');
 let traverse = require('babel-traverse');
 let generate = require('babel-generator');
+let t = require('babel-types');
 
+t = t.default || t;
 babylon = babylon.default || babylon;
 traverse = traverse.default || traverse;
 generate = generate.default || generate;
@@ -44,31 +46,74 @@ function transformCode(code_, scope, config) {
     noScope: 1,
     enter(path) {
       const { node, parent } = path;
-      if (node.type !== 'Identifier') {
-        return;
-      }
-      const type = parent && parent.type;
-      if (
-        (
-          type !== 'MemberExpression' ||
-          parent.object === node ||
+      if (node.type === 'Identifier') {
+        const type = parent && parent.type;
+        if (
+          !(parent && parent.callee === node)
+          &&
           (
-            parent.property === node &&
-            parent.computed
+            type !== 'MemberExpression' ||
+            parent.object === node ||
+            (
+              parent.property === node &&
+              parent.computed
+            )
           )
-        ) &&
-        (
-          type !== 'ObjectProperty' ||
-          parent.key !== node
-        ) &&
-        (
-          !findScope(scope, node.name)
-        )
-      ) {
-        node.name = `data.${node.name}`;
+          &&
+          (
+            type !== 'ObjectProperty' ||
+            parent.key !== node
+          )
+          &&
+          (
+            !findScope(scope, node.name)
+          )
+        ) {
+          node.name = `data.${node.name}`;
+        }
+      }
+
+      if (config.strictDataMember === false) {
+        // allow {{x.y.z}} even x is undefined
+        if (node.type !== 'MemberExpression') {
+          return;
+        }
+
+        const members = [node];
+        let root = node.object;
+
+        while (root.type === 'MemberExpression') {
+          members.push(root);
+          root = root.object;
+        }
+
+        members.reverse();
+        const args = [root];
+
+        if (root.type === 'ThisExpression') {
+          args.pop();
+          args.push(members.shift());
+        }
+
+        if (!members.length) {
+          return;
+        }
+
+        members.forEach((m) => {
+          if (m.computed) {
+            args.push(m.property);
+          } else {
+            args.push(t.stringLiteral(m.property.name));
+          }
+        });
+
+        const newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
+
+        path.replaceWith(newNode);
       }
     },
   };
+
 
   let codeStr = code_;
 

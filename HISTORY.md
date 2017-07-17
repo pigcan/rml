@@ -1,6 +1,10 @@
 # History
 ----
 
+## 0.5.4 / 2017-07-17
+
+- add strictDataMember config
+
 ## 0.5.0 / 2017-07-15
 
 - use Object.assign

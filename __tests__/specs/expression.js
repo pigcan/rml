@@ -1,4 +1,3 @@
-
 const { transformExpression } = require('../../src/expression');
 
 describe('transformExpression', () => {
@@ -50,12 +49,32 @@ describe('transformExpression', () => {
     it('support simple', () => {
       expect(transformExpression('{{x.a}}')).toEqual(`(data.x.a)`);
     });
-
     it('support []', () => {
       expect(transformExpression('{{x[a].b}}')).toEqual(`(data.x[data.a].b)`);
     });
     it('support interpolate', () => {
       expect(transformExpression('1{{x[a].b}}2')).toEqual(`'1' + (data.x[data.a].b) + '2'`);
+    });
+  });
+
+  describe('loose data member', () => {
+    const args = [null, {
+      strictDataMember: false,
+    }];
+    it('support simple', () => {
+      expect(transformExpression('{{x}}', ...args)).toMatchSnapshot();
+    });
+    it('support simple member', () => {
+      expect(transformExpression('{{x.a}}', ...args)).toMatchSnapshot();
+    });
+    it('support expression member', () => {
+      expect(transformExpression('{{x.a + x[b]}}', ...args)).toMatchSnapshot();
+    });
+    it('support [] member', () => {
+      expect(transformExpression('{{x[a].b}}', ...args)).toMatchSnapshot();
+    });
+    it('support interpolate member', () => {
+      expect(transformExpression('1{{x[a].b}}2', ...args)).toMatchSnapshot();
     });
   });
 });

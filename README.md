@@ -36,6 +36,20 @@ http://yiminghe.github.io/rml/examples/playground.html
 </div>
 ```
 
+## API
+
+```
+const { Transformer } = require('rml');
+new Transformer(template, config).transform((error, code) => {});
+```
+
+### config object
+
+| name     | description    | type     | default      |
+|----------|----------------|----------|--------------|
+|allowImportModule | whether allow import-module tag | boolean | false  |
+|strictDataMember | whether render error when encounter {{x.y}} if x is undefined | boolean | true |
+
 ## webpack-loader
 
 https://github.com/yiminghe/rml-loader

@@ -177,6 +177,20 @@ assign(MLTransformer.prototype, {
         // console.error(e);
         return done(e);
       }
+      if (this.config.strictDataMember === false) {
+        header.push(`
+function $getLooseDataMember(target, ...args) {
+  let ret = target;
+  for(let i=0; i<args.length; i++){
+    if(ret == null){
+      return ret;
+    }
+    ret = ret[args[i]];
+  }
+  return ret;
+}
+  `);
+      }
       const subTemplatesName = [];
       Object.keys(importTplDeps).forEach((dep) => {
         const index = importTplDeps[dep];
@@ -278,7 +292,13 @@ ${this.template.slice(startIndex, endIndex)}`;
 
   processExpression(exp, config) {
     try {
-      return transformExpression(exp, this.scope, config);
+      return transformExpression(
+        exp,
+        this.scope,
+        assign({
+          strictDataMember: this.config.strictDataMember,
+        }, config)
+      );
     } catch (e) {
       console.error(e);
       this.throwParseError(config);
