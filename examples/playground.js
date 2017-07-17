@@ -17548,7 +17548,7 @@ var Stream = __webpack_require__(275);
 /*</replacement>*/
 
 /*<replacement>*/
-var Buffer = __webpack_require__(171).Buffer;
+var Buffer = __webpack_require__(172).Buffer;
 /*</replacement>*/
 
 util.inherits(Writable, Stream);
@@ -18059,13 +18059,6 @@ function CorkedRequest(state) {
 /* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(87)
-
-
-/***/ }),
-/* 172 */
-/***/ (function(module, exports, __webpack_require__) {
-
 exports = module.exports = __webpack_require__(273);
 exports.Stream = exports;
 exports.Readable = exports;
@@ -18073,6 +18066,13 @@ exports.Writable = __webpack_require__(170);
 exports.Duplex = __webpack_require__(45);
 exports.Transform = __webpack_require__(274);
 exports.PassThrough = __webpack_require__(680);
+
+
+/***/ }),
+/* 172 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(87)
 
 
 /***/ }),
@@ -18482,7 +18482,9 @@ function needsParens(node, parent, printStack) {
 var babylon = __webpack_require__(132);
 var traverse = __webpack_require__(49);
 var generate = __webpack_require__(292);
+var t = __webpack_require__(3);
 
+t = t['default'] || t;
 babylon = babylon['default'] || babylon;
 traverse = traverse['default'] || traverse;
 generate = generate['default'] || generate;
@@ -18524,12 +18526,50 @@ function transformCode(code_, scope, config) {
       var node = path.node,
           parent = path.parent;
 
-      if (node.type !== 'Identifier') {
-        return;
+      if (node.type === 'Identifier') {
+        var type = parent && parent.type;
+        if (!(parent && parent.callee === node) && (type !== 'MemberExpression' || parent.object === node || parent.property === node && parent.computed) && (type !== 'ObjectProperty' || parent.key !== node) && !findScope(scope, node.name)) {
+          node.name = 'data.' + node.name;
+        }
       }
-      var type = parent && parent.type;
-      if ((type !== 'MemberExpression' || parent.object === node || parent.property === node && parent.computed) && (type !== 'ObjectProperty' || parent.key !== node) && !findScope(scope, node.name)) {
-        node.name = 'data.' + node.name;
+
+      if (config.strictDataMember === false) {
+        // allow {{x.y.z}} even x is undefined
+        if (node.type !== 'MemberExpression') {
+          return;
+        }
+
+        var members = [node];
+        var root = node.object;
+
+        while (root.type === 'MemberExpression') {
+          members.push(root);
+          root = root.object;
+        }
+
+        members.reverse();
+        var args = [root];
+
+        if (root.type === 'ThisExpression') {
+          args.pop();
+          args.push(members.shift());
+        }
+
+        if (!members.length) {
+          return;
+        }
+
+        members.forEach(function (m) {
+          if (m.computed) {
+            args.push(m.property);
+          } else {
+            args.push(t.stringLiteral(m.property.name));
+          }
+        });
+
+        var newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
+
+        path.replaceWith(newNode);
       }
     }
   };
@@ -26445,7 +26485,7 @@ var Stream = __webpack_require__(275);
 /*</replacement>*/
 
 /*<replacement>*/
-var Buffer = __webpack_require__(171).Buffer;
+var Buffer = __webpack_require__(172).Buffer;
 /*</replacement>*/
 
 /*<replacement>*/
@@ -28230,19 +28270,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-var defaultValue = '\n<import-module name="ReactNative" from="react-native" />\n<import-module name="{View, X:Y}" from="react-native" />\n<View>\n  <ReactNative.Text />\n  <Y />\n  <div r:for="{{items}}" r:key="key" r:for-index="i">\n      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">\n         {{item.value}} more than one at {{i}}\n      </div>\n  </div>\n</View>\n';
+var defaultValue = '\n<import-module name="ReactNative" from="react-native" />\n<import-module name="{View, X:Y}" from="react-native" />\n<View>\n  <ReactNative.Text /> {{x.y.z[q + 1]}} {{x}} {{x.y}}\n  <Y />\n  <div r:for="{{items}}" r:key="key" r:for-index="i">\n      <div r:if="{{item.value > 1}}" onClick="{{this.onClick}}">\n         {{item.value}} more than one at {{i}}\n      </div>\n  </div>\n</View>\n';
 
 var Page = __WEBPACK_IMPORTED_MODULE_1_react___default.a.createClass({
   displayName: 'Page',
-  getInitialState: function getInitialState() {
-    return {
-      code: this.transformRml(defaultValue)
-    };
+  componentDidMount: function componentDidMount() {
+    this.transform();
   },
   transformRml: function transformRml(rml) {
     var ret = void 0;
     new __WEBPACK_IMPORTED_MODULE_0_rml__["Transformer"](rml, {
-      allowImportModule: true
+      allowImportModule: true,
+      strictDataMember: !!this.refs.strictDataMember.checked
     }).transform(function (err, code) {
       if (err) {
         alert(err);
@@ -28275,6 +28314,13 @@ var Page = __WEBPACK_IMPORTED_MODULE_1_react___default.a.createClass({
           'button',
           { onClick: this.transform },
           'transform'
+        ),
+        '\xA0',
+        __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+          'label',
+          null,
+          'strictDataMember:',
+          __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement('input', { type: 'checkbox', ref: 'strictDataMember', defaultChecked: true })
         )
       ),
       __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
@@ -28285,7 +28331,7 @@ var Page = __WEBPACK_IMPORTED_MODULE_1_react___default.a.createClass({
       __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
         'pre',
         null,
-        this.state.code
+        this.state && this.state.code
       )
     );
   }
@@ -31854,6 +31900,9 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         // console.error(e);
         return done(e);
       }
+      if (_this2.config.strictDataMember === false) {
+        header.push('\nfunction $getLooseDataMember(target, ...args) {\n  let ret = target;\n  for(let i=0; i<args.length; i++){\n    if(ret == null){\n      return ret;\n    }\n    ret = ret[args[i]];\n  }\n  return ret;\n}\n  ');
+      }
       var subTemplatesName = [];
       Object.keys(importTplDeps).forEach(function (dep) {
         var index = importTplDeps[dep];
@@ -31940,7 +31989,9 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
   },
   processExpression: function processExpression(exp, config) {
     try {
-      return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__expression__["b" /* transformExpression */])(exp, this.scope, config);
+      return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__expression__["b" /* transformExpression */])(exp, this.scope, __WEBPACK_IMPORTED_MODULE_1_object_assign___default()({
+        strictDataMember: this.config.strictDataMember
+      }, config));
     } catch (e) {
       console.error(e);
       this.throwParseError(config);
@@ -66446,7 +66497,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(171).Buffer;
+var Buffer = __webpack_require__(172).Buffer;
 /*</replacement>*/
 
 module.exports = BufferList;
@@ -66522,14 +66573,14 @@ module.exports = Array.isArray || function (arr) {
 /* 683 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(172).PassThrough
+module.exports = __webpack_require__(171).PassThrough
 
 
 /***/ }),
 /* 684 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(172).Transform
+module.exports = __webpack_require__(171).Transform
 
 
 /***/ }),
@@ -68704,7 +68755,7 @@ var EE = __webpack_require__(88).EventEmitter;
 var inherits = __webpack_require__(22);
 
 inherits(Stream, EE);
-Stream.Readable = __webpack_require__(172);
+Stream.Readable = __webpack_require__(171);
 Stream.Writable = __webpack_require__(685);
 Stream.Duplex = __webpack_require__(679);
 Stream.Transform = __webpack_require__(684);

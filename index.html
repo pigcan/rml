@@ -7,7 +7,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" rel="stylesheet"/>
-  <title>rml@0.5.2 - An alternate markup language to react jsx</title>
+  <title>rml@0.5.4 - An alternate markup language to react jsx</title>
   <style>
     @font-face {
       font-family: octicons-anchor;
@@ -737,7 +737,7 @@
 
 <body>
 <div class="header">
-  <h1>rml@0.5.2</h1>
+  <h1>rml@0.5.4</h1>
 </div>
 <div class="examples">
   <h3>EXAMPLES</h3>
@@ -765,7 +765,32 @@ inspired by <a href="https://mp.weixin.qq.com/debug/wxadoc/dev/framework/view/wx
     <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">r:if</span>=<span class="hljs-value">"{{item.value &gt; 1}}"</span> <span class="hljs-attribute">onClick</span>=<span class="hljs-value">"{{this.onClick}}"</span>&gt;</span>
        {{item.value}} more than one
     <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span></code></pre></div><h2>webpack-loader<a id="user-content-webpack-loader" name="webpack-loader" class="anchor" aria-hidden="true" href="#webpack-loader"><span class="octicon octicon-link"></span></a></h2><p><a href="https://github.com/yiminghe/rml-loader" title="null">https://github.com/yiminghe/rml-loader</a></p>
+<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span></code></pre></div><h2>API<a id="user-content-api" name="api" class="anchor" aria-hidden="true" href="#api"><span class="octicon octicon-link"></span></a></h2><div class="highlight"><pre><code language="js"><span class="hljs-keyword">const</span> { Transformer } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rml'</span>);
+<span class="hljs-keyword">new</span> Transformer(template, config).transform((error, code) =&gt; {});</code></pre></div><h3>config object<a id="user-content-config-object" name="config-object" class="anchor" aria-hidden="true" href="#config-object"><span class="octicon octicon-link"></span></a></h3><table>
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+<th>type</th>
+<th>default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>allowImportModule</td>
+<td>whether allow import-module tag</td>
+<td>boolean</td>
+<td>false</td>
+</tr>
+<tr>
+<td>strictDataMember</td>
+<td>whether render error when encounter {{x.y}} if x is undefined</td>
+<td>boolean</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<h2>webpack-loader<a id="user-content-webpack-loader" name="webpack-loader" class="anchor" aria-hidden="true" href="#webpack-loader"><span class="octicon octicon-link"></span></a></h2><p><a href="https://github.com/yiminghe/rml-loader" title="null">https://github.com/yiminghe/rml-loader</a></p>
 <h2>syntax<a id="user-content-syntax" name="syntax" class="anchor" aria-hidden="true" href="#syntax"><span class="octicon octicon-link"></span></a></h2><p>for details checkout: <a href="https://github.com/yiminghe/rml/blob/master/tests/specs" title="null">https://github.com/yiminghe/rml/blob/master/tests/specs</a></p>
 <h3>data binding<a id="user-content-data-binding" name="data-binding" class="anchor" aria-hidden="true" href="#data-binding"><span class="octicon octicon-link"></span></a></h3><div class="highlight"><pre><code language="undefined">{{x}}</code></pre></div><h3>loop<a id="user-content-loop" name="loop" class="anchor" aria-hidden="true" href="#loop"><span class="octicon octicon-link"></span></a></h3><div class="highlight"><pre><code language="html"><span class="hljs-tag">&lt;<span class="hljs-title">tag</span> <span class="hljs-attribute">r:for</span>=<span class="hljs-value">"{{items}}"</span> <span class="hljs-attribute">r:key</span>=<span class="hljs-value">"key"</span> <span class="hljs-attribute">r:for-item</span>=<span class="hljs-value">"item"</span> <span class="hljs-attribute">r:for-index</span>=<span class="hljs-value">"index"</span>&gt;</span>
     {{item.value}} at {{index}}
