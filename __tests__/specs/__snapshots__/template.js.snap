@@ -30,7 +30,46 @@ export default function render(data) {
 };"
 `;
 
-exports[`MLTransformer template pure only allow one child 1`] = `"parse error: template can only has one render child! : <template name=\\"t\\">"`;
+exports[`MLTransformer template pure only allow one child 1`] = `
+"import React from 'react';
+
+let $templates$ = {};
+export const $ownTemplates$ = {};
+$ownTemplates$['t'] = function (data) {
+  return (
+    [
+    <div>
+      {(data.z)}
+    </div>
+    ,
+    <div>
+      {(data.z)}
+    </div>
+    ,
+    ]
+  );
+};
+
+class $ReactClass_t extends React.PureComponent {
+  render() {
+    const children = $ownTemplates$['t'].call(this.props.children, this.props);
+    if(React.Children.count(children) > 1) {
+      throw new Error('template \`t\` can only has one render child!');
+    }
+    return children;
+  }
+}
+
+$ownTemplates$['t'].Component = $ReactClass_t;
+$templates$ = $ownTemplates$;
+export default function render(data) {
+  return (
+    <div>
+      { React.createElement($templates$[(data.x % 2 ? 't' : 'z')].Component, (({ ...data.o })), this) }
+    </div>
+  );
+};"
+`;
 
 exports[`MLTransformer template support import 1`] = `
 "import React from 'react';
@@ -85,7 +124,11 @@ $ownTemplates$['t'] = function (data) {
 
 class $ReactClass_t extends React.PureComponent {
   render() {
-    return $ownTemplates$['t'].call(this.props.children, this.props);
+    const children = $ownTemplates$['t'].call(this.props.children, this.props);
+    if(React.Children.count(children) > 1) {
+      throw new Error('template \`t\` can only has one render child!');
+    }
+    return children;
   }
 }
 

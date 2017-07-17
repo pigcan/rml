@@ -43,8 +43,8 @@ describe('MLTransformer', () => {
           `<template is="{{x%2?'t':'z'}}" data="{{...o}}" />`,
           `</div>`,
         ].join('\n'), { pure: true }
-      ).transform((err) => {
-        expect(err.message).toMatchSnapshot();
+      ).transform((err, code) => {
+        expect(code).toMatchSnapshot();
         done();
       });
     });

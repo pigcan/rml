@@ -207,7 +207,11 @@ assign(MLTransformer.prototype, {
             header.push(`
 class $ReactClass_${className} extends React.PureComponent {
   render() {
-    return $ownTemplates$['${name}'].call(this.props.children, this.props);
+    const children = $ownTemplates$['${name}'].call(this.props.children, this.props);
+    if(React.Children.count(children) > 1) {
+      throw new Error('template \`${name}\` can only has one render child!');
+    }
+    return children;
   }
 }
 `);
@@ -476,9 +480,6 @@ ${this.template.slice(startIndex, endIndex)}`;
       } else {
         this.pushState();
         const { name } = attrs;
-        if (pure && isRenderChildrenArray.call(this, node.children, true)) {
-          this.throwParseError({ node, reason: `template can only has one render child!` });
-        }
         this.generateCodeForTags(node.children, TOP_LEVEL);
         subTemplatesCode[name] = this.popState().code;
       }
