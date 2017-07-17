@@ -11076,6 +11076,9 @@ function transformAbsoluteToRelative(projectRoot, filepath, absolutePath) {
   if (firstChar === '/') {
     var srcDir = __WEBPACK_IMPORTED_MODULE_0_path___default.a.dirname(filepath.slice(projectRoot.length));
     retPath = __WEBPACK_IMPORTED_MODULE_0_path___default.a.relative(srcDir, retPath);
+    if (!retPath.startsWith('./') && !retPath.startsWith('../')) {
+      retPath = './' + retPath;
+    }
   }
   return retPath;
 }
