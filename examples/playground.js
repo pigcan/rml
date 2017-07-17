@@ -31876,7 +31876,7 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
           header.push('};');
           if (pure) {
             var className = name.replace(/-/, '$_$');
-            header.push('\nclass $ReactClass_' + className + ' extends React.PureComponent {\n  render() {\n    return $ownTemplates$[\'' + name + '\'].call(this.props.children, this.props);\n  }\n}\n');
+            header.push('\nclass $ReactClass_' + className + ' extends React.PureComponent {\n  render() {\n    const children = $ownTemplates$[\'' + name + '\'].call(this.props.children, this.props);\n    if(React.Children.count(children) > 1) {\n      throw new Error(\'template `' + name + '` can only has one render child!\');\n    }\n    return children;\n  }\n}\n');
             header.push('$ownTemplates$[\'' + name + '\'].Component = $ReactClass_' + className + ';');
           }
         }
@@ -32132,9 +32132,6 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         this.pushState();
         var name = attrs.name;
 
-        if (pure && isRenderChildrenArray.call(this, node.children, true)) {
-          this.throwParseError({ node: node, reason: 'template can only has one render child!' });
-        }
         this.generateCodeForTags(node.children, TOP_LEVEL);
         subTemplatesCode[name] = this.popState().code;
       }
