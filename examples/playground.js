@@ -31773,7 +31773,7 @@ function isRenderChildrenArray() {
         return count + 2;
       }
       // elseif else not count
-      if (attrs[_this.ELIF_ATTR_NAME] || attrs[_this.ELSE_ATTR_NAME]) {
+      if (attrs[_this.ELIF_ATTR_NAME] || _this.ELSE_ATTR_NAME in attrs) {
         return count;
       }
       if (tag === 'import-module' || tag === 'template' && !attrs.is || tag === 'import') {
