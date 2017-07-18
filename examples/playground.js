@@ -31762,7 +31762,7 @@ function isRenderChildrenArray() {
   var considerFor = arguments[1];
 
   var totalCount = children.reduce(function (count, c) {
-    if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
+    if (c.type === 'script' || c.type === 'text' && !c.data.trim() || c.type === 'comment') {
       return count;
     }
     var tag = c.type === 'tag' && c.name;
@@ -32005,7 +32005,7 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
     if (children && children.length) {
       var i = 0;
       children = children.filter(function (c) {
-        return !(c.type === 'text' && !c.data.trim());
+        return !(c.type === 'text' && !c.data.trim() || c.type === 'comment');
       });
       var l = children.length;
       if (!l) {
