@@ -1,4 +1,3 @@
-
 const MLTransformer = require('../../src/Transformer');
 
 describe('MLTransformer', () => {
@@ -85,6 +84,19 @@ describe('MLTransformer', () => {
     ].join('\n'), {
       allowScript: true,
     }).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
+  it('skip comment', (done) => {
+    new MLTransformer(
+      `
+<!-- 1 -->
+<a />
+<!-- 2 -->
+`.trim()
+    ).transform((err, code) => {
       expect(code).toMatchSnapshot();
       done();
     });

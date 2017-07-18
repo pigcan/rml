@@ -1,7 +1,7 @@
 {
   "name": "rml",
   "description": "An alternate markup language to react jsx",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "keywords": [
     "react",
     "jsx"

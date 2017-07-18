@@ -36,7 +36,7 @@ function isTopLevel(level) {
 
 function isRenderChildrenArray(children = [], considerFor) {
   const totalCount = children.reduce((count, c) => {
-    if (c.type === 'script' || c.type === 'text' && !c.data.trim()) {
+    if (c.type === 'script' || c.type === 'text' && !c.data.trim() || c.type === 'comment') {
       return count;
     }
     const tag = c.type === 'tag' && c.name;
@@ -311,7 +311,8 @@ ${this.template.slice(startIndex, endIndex)}`;
     let children = children_;
     if (children && children.length) {
       let i = 0;
-      children = children.filter(c => !(c.type === 'text' && !c.data.trim()));
+      children = children
+        .filter(c => !(c.type === 'text' && !c.data.trim() || c.type === 'comment'));
       const l = children.length;
       if (!l) {
         return;

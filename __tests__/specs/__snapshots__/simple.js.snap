@@ -45,6 +45,17 @@ export default function render(data) {
 };"
 `;
 
+exports[`MLTransformer skip comment 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <a>
+    </a>
+  );
+};"
+`;
+
 exports[`MLTransformer style/className/class can not be bool 1`] = `
 "import React from 'react';
 
