@@ -82,4 +82,19 @@ describe('conditional render', () => {
         done();
       });
   });
+
+  it('skip comment', (done) => {
+    new MLTransformer(`
+<!--1-->
+<block r:if="a">1</block>
+<!--1-->
+<block r:elif="a">1</block>
+<!--1-->
+<view r:else>1</view>
+`.trim())
+      .transform((err, code) => {
+        expect(code).toMatchSnapshot();
+        done();
+      });
+  });
 });

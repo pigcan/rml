@@ -47,7 +47,7 @@ function isRenderChildrenArray(children = [], considerFor) {
         return count + 2;
       }
       // elseif else not count
-      if (attrs[this.ELIF_ATTR_NAME] || attrs[this.ELSE_ATTR_NAME]) {
+      if (attrs[this.ELIF_ATTR_NAME] || this.ELSE_ATTR_NAME in attrs) {
         return count;
       }
       if (tag === 'import-module' || tag === 'template' && !attrs.is || tag === 'import') {
