@@ -152,14 +152,18 @@ assign(MLTransformer.prototype, {
 
     const handler = new DomHandler((error, children) => {
       if (error) {
-        // console.error(error);
+        if (this.config.consoleError) {
+          console.error(error);
+        }
         return done(error);
       }
 
       try {
         this.generateCodeForTags(children, TOP_LEVEL);
       } catch (e) {
-        // console.error(e);
+        if (this.config.consoleError) {
+          console.error(e);
+        }
         return done(e);
       }
 
@@ -174,7 +178,9 @@ assign(MLTransformer.prototype, {
           }
         });
       } catch (e) {
-        // console.error(e);
+        if (this.config.consoleError) {
+          console.error(e);
+        }
         return done(e);
       }
       if (this.config.strictDataMember === false) {
@@ -265,7 +271,7 @@ class $ReactClass_${className} extends React.PureComponent {
     this.header.push(padding(level, str));
   },
 
-  throwParseError(config) {
+  throwParseError(config, originalError) {
     const { node, text, attrName, reason } = config;
     let endIndex = node.endIndex;
     const startIndex = node.startIndex;
@@ -286,6 +292,7 @@ ${this.template.slice(startIndex, endIndex)}`;
     assign(oe, config, {
       startIndex,
       endIndex,
+      originalError,
     });
     throw oe;
   },
@@ -300,8 +307,10 @@ ${this.template.slice(startIndex, endIndex)}`;
         }, config)
       );
     } catch (e) {
-      console.error(e);
-      this.throwParseError(config);
+      if (this.config.consoleError) {
+        console.error(e);
+      }
+      this.throwParseError(config, e);
     }
   },
 
@@ -451,11 +460,13 @@ ${this.template.slice(startIndex, endIndex)}`;
         try {
           deps = attrs.name && processImportComponent(attrs.name);
         } catch (e) {
-          console.error(e);
+          if (this.config.consoleError) {
+            console.error(e);
+          }
           this.throwParseError({
             node,
             attrName: 'name',
-          });
+          }, e);
         }
         let depCode = '';
         if (Array.isArray(deps)) {

@@ -122,7 +122,11 @@ function transformCode(code_, scope, config) {
   }
 
   const ast = babylon.parse(`(${codeStr})`, babylonConfig);
+  // if (ast.type === 'Identifier') {
+  //   ast.name = `data.${ast.name}`;
+  // } else {
   traverse(ast, visitor);
+  // }
   let { code } = generate(ast);
   if (code.charAt(code.length - 1) === ';') {
     code = code.slice(0, -1);
