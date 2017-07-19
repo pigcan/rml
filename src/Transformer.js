@@ -5,7 +5,7 @@
 import assign from 'object-assign';
 import htmlparser from 'htmlparser2';
 import DomHandler from 'domhandler';
-import { transformExpression } from './expression';
+import { transformExpression, hasExpression } from './expression';
 import {
   camelCase,
   padding, startsWith,
@@ -97,6 +97,12 @@ function MLTransformer(template, config_) {
 }
 
 assign(MLTransformer.prototype, {
+  isConditionalNode(element) {
+    const attrs = element.attribs || {};
+    return this.IF_ATTR_NAME in attrs ||
+      this.ELIF_ATTR_NAME in attrs ||
+      this.ELSE_ATTR_NAME in attrs;
+  },
   isStartOfCodeSection(level, preCalculate, justCheck) {
     if (justCheck) {
       return (this.codeDepth[this.codeDepth.length - 1] + 1) === 1 && !isTopLevel(level);
@@ -553,7 +559,7 @@ ${this.template.slice(startIndex, endIndex)}`;
       const indexName = attrs[this.FOR_INDEX_ATTR_NAME] || 'index';
       const itemName = attrs[this.FOR_ITEM_ATTR_NAME] || 'item';
       const keyName = attrs[this.FOR_KEY_ATTR_NAME];
-      if (keyName) {
+      if (keyName && !hasExpression(keyName)) {
         forKey = keyName === '*this' ? itemName : `${itemName}.${keyName}`;
       }
       this.scope.push({
@@ -655,7 +661,7 @@ ${this.template.slice(startIndex, endIndex)}`;
       // block will not emit any tag, so reuse current code section
       const currentCodeLength = this.code.length;
       this.generateCodeForTags(node.children, level);
-      if (inFor && this.code.length === currentCodeLength) {
+      if ((inFor || this.isConditionalNode(node)) && this.code.length === currentCodeLength) {
         this.pushCode(level, 'null');
       }
     }

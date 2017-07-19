@@ -61,7 +61,7 @@ export default function render(data) {
     ('z' || []).map((item, index) => {
       return (
         <view>
-          {1}
+          {'1'}
         </view>
       );
     })

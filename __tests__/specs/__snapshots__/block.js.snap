@@ -24,6 +24,30 @@ export default function render(data) {
 };"
 `;
 
+exports[`block allow empty if 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    (
+    ((data.x)) ?
+    (
+    (
+    ((data.x)) ?
+    (
+    null
+    )
+    :
+    null
+    )
+    )
+    :
+    null
+    )
+  );
+};"
+`;
+
 exports[`block allow empty in array 1`] = `
 "import React from 'react';
 

@@ -31,6 +31,19 @@ export default function render(data) {
 };"
 `;
 
+exports[`MLTransformer do not change number 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <a
+      x = {'123'}
+    >
+    </a>
+  );
+};"
+`;
+
 exports[`MLTransformer escape attribute 1`] = `
 "import React from 'react';
 
@@ -109,17 +122,17 @@ export default function render(data) {
   return (
     <div
       prop = {(data.a + data.b)}
-      x = {1}
+      x = {'1'}
       onClick = {(this.onClick)}
     >
       <div>
         {'1' + (data.a[0].b) + '2'}
       </div>
       <div>
-        {1}
+        {'1'}
       </div>
       <div>
-        {1}
+        {'1'}
       </div>
     </div>
   );

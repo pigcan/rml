@@ -1,6 +1,10 @@
 # History
 ----
 
+## 0.6.0 / 2017-07-19
+
+- do not transform number automatically
+
 ## 0.5.4 / 2017-07-17
 
 - add strictDataMember config

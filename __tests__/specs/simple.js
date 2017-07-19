@@ -14,6 +14,17 @@ describe('MLTransformer', () => {
     });
   });
 
+  it('do not change number', (done) => {
+    new MLTransformer(
+      `
+<a x="123" />
+`.trim()
+    ).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
   it('escape attribute', (done) => {
     new MLTransformer(
       `

@@ -2,13 +2,6 @@
 
 import path from 'path';
 
-const numberReSnippet = '(?:NaN|-?(?:(?:\\d+|\\d*\\.\\d+)(?:[E|e][+|-]?\\d+)?|Infinity))';
-const matchOnlyNumberRe = new RegExp(`^(${numberReSnippet})$`);
-
-export function isNumber(str) {
-  return !!str.trim().match(matchOnlyNumberRe);
-}
-
 export function padding(level, str) {
   return new Array(level + 1).join(' ') + str;
 }

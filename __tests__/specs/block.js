@@ -24,6 +24,15 @@ describe('block', () => {
     });
   });
 
+  it('allow empty if', (done) => {
+    new MLTransformer(`
+<block r:if="{{x}}"><block r:if="{{x}}"></block></block>
+`).transform((err, code) => {
+      expect(code).toMatchSnapshot();
+      done();
+    });
+  });
+
   it('allow empty', (done) => {
     new MLTransformer(`
 <block></block>

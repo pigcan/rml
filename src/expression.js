@@ -13,8 +13,6 @@ babylon = babylon.default || babylon;
 traverse = traverse.default || traverse;
 generate = generate.default || generate;
 
-import { isNumber } from './utils';
-
 const expressionTagReg = /\{\{([^}]+)\}\}/g;
 const fullExpressionTagReg = /^\{\{([^}]+)\}\}$/;
 const spreadReg = /^\.\.\.[\w$_]/;
@@ -140,7 +138,7 @@ function transformExpressionByPart(str_, scope, config) {
   }
   const str = str_.trim();
   if (!str.match(expressionTagReg)) {
-    return [isNumber(str) ? str : `'${escapeString(str_)}'`];
+    return [`'${escapeString(str_)}'`];
   }
   let match = str.match(fullExpressionTagReg);
   if (match) {
