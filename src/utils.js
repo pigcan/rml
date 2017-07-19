@@ -25,10 +25,12 @@ export function transformAbsoluteToRelative(projectRoot,
                                             filepath,
                                             absolutePath) {
   let retPath = absolutePath;
+  retPath = retPath.replace(/\\/g, '/');
   const firstChar = retPath.charAt(0);
   if (firstChar === '/') {
     const srcDir = path.dirname(filepath.slice(projectRoot.length));
     retPath = path.relative(srcDir, retPath);
+    retPath = retPath.replace(/\\/g, '/');
     if (!retPath.startsWith('./') && !retPath.startsWith('../')) {
       retPath = `./${retPath}`;
     }
