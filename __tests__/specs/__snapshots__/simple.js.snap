@@ -58,6 +58,19 @@ export default function render(data) {
 };"
 `;
 
+exports[`MLTransformer explicit number 1`] = `
+"import React from 'react';
+
+export default function render(data) {
+  return (
+    <a
+      x = {(123)}
+    >
+    </a>
+  );
+};"
+`;
+
 exports[`MLTransformer skip comment 1`] = `
 "import React from 'react';
 
