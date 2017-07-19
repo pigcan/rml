@@ -11072,10 +11072,12 @@ function camelCase(name) {
 
 function transformAbsoluteToRelative(projectRoot, filepath, absolutePath) {
   var retPath = absolutePath;
+  retPath = retPath.replace(/\\/g, '/');
   var firstChar = retPath.charAt(0);
   if (firstChar === '/') {
     var srcDir = __WEBPACK_IMPORTED_MODULE_0_path___default.a.dirname(filepath.slice(projectRoot.length));
     retPath = __WEBPACK_IMPORTED_MODULE_0_path___default.a.relative(srcDir, retPath);
+    retPath = retPath.replace(/\\/g, '/');
     if (!retPath.startsWith('./') && !retPath.startsWith('../')) {
       retPath = './' + retPath;
     }
