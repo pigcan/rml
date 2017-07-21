@@ -44,11 +44,12 @@ function transformCode(code_, scope, config) {
     noScope: 1,
     enter(path) {
       const { node, parent } = path;
+      if (parent && parent.callee === node) {
+        return;
+      }
       if (node.type === 'Identifier') {
         const type = parent && parent.type;
         if (
-          !(parent && parent.callee === node)
-          &&
           (
             type !== 'MemberExpression' ||
             parent.object === node ||

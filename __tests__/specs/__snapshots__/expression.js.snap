@@ -6,6 +6,10 @@ exports[`transformExpression loose data member support expression member 1`] = `
 
 exports[`transformExpression loose data member support interpolate member 1`] = `"'1' + ($getLooseDataMember(data.x, data.a, \\"b\\")) + '2'"`;
 
+exports[`transformExpression loose data member support member function 1`] = `"($getLooseDataMember(data.x, \\"y\\").join(\\",\\"))"`;
+
 exports[`transformExpression loose data member support simple 1`] = `"(data.x)"`;
 
 exports[`transformExpression loose data member support simple member 1`] = `"($getLooseDataMember(data.x, \\"a\\"))"`;
+
+exports[`transformExpression member expression support member function 1`] = `"(data.x.y.join(\\",\\"))"`;

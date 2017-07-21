@@ -46,6 +46,9 @@ describe('transformExpression', () => {
     });
   });
   describe('member expression', () => {
+    it('support member function', () => {
+      expect(transformExpression('{{x.y.join(",")}}')).toMatchSnapshot();
+    });
     it('support simple', () => {
       expect(transformExpression('{{x.a}}')).toEqual(`(data.x.a)`);
     });
@@ -61,6 +64,9 @@ describe('transformExpression', () => {
     const args = [null, {
       strictDataMember: false,
     }];
+    it('support member function', () => {
+      expect(transformExpression('{{x.y.join(",")}}', ...args)).toMatchSnapshot();
+    });
     it('support simple', () => {
       expect(transformExpression('{{x}}', ...args)).toMatchSnapshot();
     });
