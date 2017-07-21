@@ -25447,7 +25447,11 @@ function transformExpressionByPart(str_, scope, config) {
 function transformExpression(str_, scope) {
   var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-  return transformExpressionByPart(str_, scope, config).join(' + ');
+  var ret = transformExpressionByPart(str_, scope, config);
+  if ('text' in config) {
+    return ret.length > 1 ? '[' + ret.join(', ') + ']' : ret[0];
+  }
+  return ret.join(' + ');
 }
 
 function hasExpression(str) {
