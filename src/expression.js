@@ -165,7 +165,11 @@ function transformExpressionByPart(str_, scope, config) {
 }
 
 export function transformExpression(str_, scope, config = {}) {
-  return transformExpressionByPart(str_, scope, config).join(' + ');
+  const ret = transformExpressionByPart(str_, scope, config);
+  if ('text' in config) {
+    return ret.length > 1 ? `[${ret.join(', ')}]` : ret[0];
+  }
+  return ret.join(' + ');
 }
 
 export function hasExpression(str) {
