@@ -25340,9 +25340,12 @@ function transformCode(code_, scope, config) {
       var node = path.node,
           parent = path.parent;
 
+      if (parent && parent.callee === node) {
+        return;
+      }
       if (node.type === 'Identifier') {
         var type = parent && parent.type;
-        if (!(parent && parent.callee === node) && (type !== 'MemberExpression' || parent.object === node || parent.property === node && parent.computed) && (type !== 'ObjectProperty' || parent.key !== node) && !findScope(scope, node.name)) {
+        if ((type !== 'MemberExpression' || parent.object === node || parent.property === node && parent.computed) && (type !== 'ObjectProperty' || parent.key !== node) && !findScope(scope, node.name)) {
           node.name = 'data.' + node.name;
         }
       }
