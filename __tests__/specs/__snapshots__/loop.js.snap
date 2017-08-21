@@ -12,7 +12,7 @@ export default function render(data) {
           <div
             key = {t.u}
           >
-            {(i) + ' - ' + (t) + ' - ' + (data.z)}
+            {[(i), ' - ', (t), ' - ', (data.z)]}
           </div>
         );
       })

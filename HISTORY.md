@@ -1,6 +1,10 @@
 # History
 ----
 
+## 0.7.0 / 2017-08-21
+
+- add pureTemplateFactory config
+
 ## 0.6.0 / 2017-07-19
 
 - do not transform number automatically

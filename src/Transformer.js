@@ -222,16 +222,22 @@ function $getLooseDataMember(target, ...args) {
         header.push(`export const $ownTemplates$ = {};`);
       }
       Object.keys(subTemplatesCode).forEach((name) => {
-        if (subTemplatesCode[name].length) {
+        const { code: templateCode, node } = subTemplatesCode[name];
+        if (templateCode.length) {
           header.push(`$ownTemplates$['${name}'] = function (data) {`);
           this.pushHeaderCode(2, 'return (');
-          header = this.header = header.concat(subTemplatesCode[name]);
+          header = this.header = header.concat(templateCode);
           this.pushHeaderCode(2, ');');
           header.push('};');
           if (pure) {
-            const className = name.replace(/-/, '$_$');
-            header.push(`
-class $ReactClass_${className} extends React.PureComponent {
+            const { pureTemplateFactory } = this.config;
+            if (pureTemplateFactory) {
+              header.push(pureTemplateFactory({ node }));
+            } else {
+              const className = name.replace(/[-/]/g, '$_$');
+              const ReactClass = `$ReactClass_${className}`;
+              header.push(`
+class ${ReactClass} extends React.PureComponent {
   render() {
     const children = $ownTemplates$['${name}'].call(this.props.children, this.props);
     if(React.Children.count(children) > 1) {
@@ -240,8 +246,9 @@ class $ReactClass_${className} extends React.PureComponent {
     return children;
   }
 }
+$ownTemplates$['${name}'].Component = ${ReactClass};
 `);
-            header.push(`$ownTemplates$['${name}'].Component = $ReactClass_${className};`);
+            }
           }
         }
       });
@@ -519,7 +526,7 @@ ${this.template.slice(startIndex, endIndex)}`;
         this.pushState();
         const { name } = attrs;
         this.generateCodeForTags(node.children, TOP_LEVEL);
-        subTemplatesCode[name] = this.popState().code;
+        subTemplatesCode[name] = { code: this.popState().code, node };
       }
       return;
     }
