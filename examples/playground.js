@@ -37961,16 +37961,26 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         header.push('export const $ownTemplates$ = {};');
       }
       Object.keys(subTemplatesCode).forEach(function (name) {
-        if (subTemplatesCode[name].length) {
+        var _subTemplatesCode$nam = subTemplatesCode[name],
+            templateCode = _subTemplatesCode$nam.code,
+            node = _subTemplatesCode$nam.node;
+
+        if (templateCode.length) {
           header.push('$ownTemplates$[\'' + name + '\'] = function (data) {');
           _this2.pushHeaderCode(2, 'return (');
-          header = _this2.header = header.concat(subTemplatesCode[name]);
+          header = _this2.header = header.concat(templateCode);
           _this2.pushHeaderCode(2, ');');
           header.push('};');
           if (pure) {
-            var className = name.replace(/-/, '$_$');
-            header.push('\nclass $ReactClass_' + className + ' extends React.PureComponent {\n  render() {\n    const children = $ownTemplates$[\'' + name + '\'].call(this.props.children, this.props);\n    if(React.Children.count(children) > 1) {\n      throw new Error(\'template `' + name + '` can only has one render child!\');\n    }\n    return children;\n  }\n}\n');
-            header.push('$ownTemplates$[\'' + name + '\'].Component = $ReactClass_' + className + ';');
+            var pureTemplateFactory = _this2.config.pureTemplateFactory;
+
+            if (pureTemplateFactory) {
+              header.push(pureTemplateFactory({ node: node }));
+            } else {
+              var className = name.replace(/[-/]/g, '$_$');
+              var ReactClass = '$ReactClass_' + className;
+              header.push('\nclass ' + ReactClass + ' extends React.PureComponent {\n  render() {\n    const children = $ownTemplates$[\'' + name + '\'].call(this.props.children, this.props);\n    if(React.Children.count(children) > 1) {\n      throw new Error(\'template `' + name + '` can only has one render child!\');\n    }\n    return children;\n  }\n}\n$ownTemplates$[\'' + name + '\'].Component = ' + ReactClass + ';\n');
+            }
           }
         }
       });
@@ -38233,7 +38243,7 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         var name = attrs.name;
 
         this.generateCodeForTags(node.children, TOP_LEVEL);
-        subTemplatesCode[name] = this.popState().code;
+        subTemplatesCode[name] = { code: this.popState().code, node: node };
       }
       return;
     }
