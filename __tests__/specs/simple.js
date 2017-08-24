@@ -39,7 +39,7 @@ describe('MLTransformer', () => {
   it('escape attribute', (done) => {
     new MLTransformer(
       `
-<a x='"\`'>"'\`</a>
+<a x='"\`$'>"'\`$</a>
 `.trim()
     ).transform((err, code) => {
       expect(code).toMatchSnapshot();
