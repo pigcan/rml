@@ -25330,7 +25330,7 @@ function findScope(scope, name) {
 }
 
 function escapeString(str) {
-  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return str.replace(/[\\`$]/g, '\\$&');
 }
 
 function transformCode(code_, scope, config) {
@@ -25419,7 +25419,7 @@ function transformExpressionByPart(str_, scope, config) {
   }
   var str = str_.trim();
   if (!str.match(expressionTagReg)) {
-    return ['\'' + escapeString(str_) + '\''];
+    return ['`' + escapeString(str_) + '`'];
   }
   var match = str.match(fullExpressionTagReg);
   if (match) {
@@ -25432,14 +25432,14 @@ function transformExpressionByPart(str_, scope, config) {
   while (match = expressionTagReg.exec(str)) {
     var code = match[1];
     if (match.index !== lastIndex) {
-      gen.push('\'' + escapeString(str.slice(lastIndex, match.index)) + '\'');
+      gen.push('`' + escapeString(str.slice(lastIndex, match.index)) + '`');
     }
     gen.push(transformCode(code, scope, config));
     lastIndex = expressionTagReg.lastIndex;
   }
 
   if (lastIndex < totalLength) {
-    gen.push('\'' + escapeString(str.slice(lastIndex)) + '\'');
+    gen.push('`' + escapeString(str.slice(lastIndex)) + '`');
   }
   return gen;
 }
