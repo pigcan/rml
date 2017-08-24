@@ -59,8 +59,8 @@ class $ReactClass_t extends React.PureComponent {
     return children;
   }
 }
-
 $ownTemplates$['t'].Component = $ReactClass_t;
+
 $templates$ = $ownTemplates$;
 export default function render(data) {
   return (
@@ -131,8 +131,8 @@ class $ReactClass_t extends React.PureComponent {
     return children;
   }
 }
-
 $ownTemplates$['t'].Component = $ReactClass_t;
+
 $templates$ = $ownTemplates$;
 export default function render(data) {
   return (

@@ -36,7 +36,7 @@ function findScope(scope, name) {
 }
 
 function escapeString(str) {
-  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return str.replace(/[\\`$]/g, '\\$&');
 }
 
 function transformCode(code_, scope, config) {
@@ -139,7 +139,7 @@ function transformExpressionByPart(str_, scope, config) {
   }
   const str = str_.trim();
   if (!str.match(expressionTagReg)) {
-    return [`'${escapeString(str_)}'`];
+    return [`\`${escapeString(str_)}\``];
   }
   let match = str.match(fullExpressionTagReg);
   if (match) {
@@ -152,20 +152,24 @@ function transformExpressionByPart(str_, scope, config) {
   while ((match = expressionTagReg.exec(str))) {
     const code = match[1];
     if (match.index !== lastIndex) {
-      gen.push(`'${escapeString(str.slice(lastIndex, match.index))}'`);
+      gen.push(`\`${escapeString(str.slice(lastIndex, match.index))}\``);
     }
     gen.push(transformCode(code, scope, config));
     lastIndex = expressionTagReg.lastIndex;
   }
 
   if (lastIndex < totalLength) {
-    gen.push(`'${escapeString(str.slice(lastIndex))}'`);
+    gen.push(`\`${escapeString(str.slice(lastIndex))}\``);
   }
   return gen;
 }
 
 export function transformExpression(str_, scope, config = {}) {
-  return transformExpressionByPart(str_, scope, config).join(' + ');
+  const ret = transformExpressionByPart(str_, scope, config);
+  if ('text' in config) {
+    return ret.length > 1 ? `[${ret.join(', ')}]` : ret[0];
+  }
+  return ret.join(' + ');
 }
 
 export function hasExpression(str) {

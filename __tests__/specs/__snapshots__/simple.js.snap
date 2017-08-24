@@ -139,7 +139,7 @@ export default function render(data) {
       onClick = {(this.onClick)}
     >
       <div>
-        {'1' + (data.a[0].b) + '2'}
+        {['1', (data.a[0].b), '2']}
       </div>
       <div>
         {'1'}
