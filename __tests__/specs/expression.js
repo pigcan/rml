@@ -2,47 +2,47 @@ const { transformExpression } = require('../../src/expression');
 
 describe('transformExpression', () => {
   it('keep this', () => {
-    expect(transformExpression('{{this.x}}')).toEqual(`(this.x)`);
+    expect(transformExpression('{{this.x}}')).toMatchSnapshot();
   });
   it('support literal', () => {
-    expect(transformExpression('x')).toEqual(`'x'`);
+    expect(transformExpression('x')).toMatchSnapshot();
   });
   it('support simple', () => {
-    expect(transformExpression('{{x}}')).toEqual(`(data.x)`);
+    expect(transformExpression('{{x}}')).toMatchSnapshot();
   });
   it('support forceObject', () => {
-    expect(transformExpression('{{x}}', null, { forceObject: 1 })).toEqual(`(({ x: data.x }))`);
+    expect(transformExpression('{{x}}', null, { forceObject: 1 })).toMatchSnapshot();
   });
   it('support spread', () => {
-    expect(transformExpression('{{ ...x }}')).toEqual(`(({ ...data.x }))`);
+    expect(transformExpression('{{ ...x }}')).toMatchSnapshot();
   });
   it('support interpolate', () => {
-    expect(transformExpression('1-{{x + y}}-2')).toEqual(`'1-' + (data.x + data.y) + '-2'`);
+    expect(transformExpression('1-{{x + y}}-2')).toMatchSnapshot();
   });
   it('support interpolate 2', () => {
-    expect(transformExpression('{{x + y}}-2')).toEqual(`(data.x + data.y) + '-2'`);
+    expect(transformExpression('{{x + y}}-2')).toMatchSnapshot();
   });
   it('support ternary', () => {
-    expect(transformExpression('{{flag ? true : false}}')).toEqual(`(data.flag ? true : false)`);
+    expect(transformExpression('{{flag ? true : false}}')).toMatchSnapshot();
   });
   it('support logic', () => {
-    expect(transformExpression('{{x>5}}')).toEqual(`(data.x > 5)`);
+    expect(transformExpression('{{x>5}}')).toMatchSnapshot();
   });
   it('support string', () => {
-    expect(transformExpression('{{"hello"+x}}')).toEqual(`("hello" + data.x)`);
+    expect(transformExpression('{{"hello"+x}}')).toMatchSnapshot();
   });
   it('support array', () => {
-    expect(transformExpression('{{[x,2]}}')).toEqual(`([data.x, 2])`);
+    expect(transformExpression('{{[x,2]}}')).toMatchSnapshot();
   });
   describe('object', () => {
     it('support simple', () => {
-      expect(transformExpression('{{x:y}}')).toEqual(`(({ x: data.y }))`);
+      expect(transformExpression('{{x:y}}')).toMatchSnapshot();
     });
     it('support shorthand', () => {
-      expect(transformExpression('{{x,y}}')).toEqual(`(({ x: data.x, y: data.y }))`);
+      expect(transformExpression('{{x,y}}')).toMatchSnapshot();
     });
     it('support spread', () => {
-      expect(transformExpression('{{...x,y}}')).toEqual(`(({ ...data.x, y: data.y }))`);
+      expect(transformExpression('{{...x,y}}')).toMatchSnapshot();
     });
   });
   describe('member expression', () => {
@@ -50,13 +50,13 @@ describe('transformExpression', () => {
       expect(transformExpression('{{x.y.join(",")}}')).toMatchSnapshot();
     });
     it('support simple', () => {
-      expect(transformExpression('{{x.a}}')).toEqual(`(data.x.a)`);
+      expect(transformExpression('{{x.a}}')).toMatchSnapshot();
     });
     it('support []', () => {
-      expect(transformExpression('{{x[a].b}}')).toEqual(`(data.x[data.a].b)`);
+      expect(transformExpression('{{x[a].b}}')).toMatchSnapshot();
     });
     it('support interpolate', () => {
-      expect(transformExpression('1{{x[a].b}}2')).toEqual(`'1' + (data.x[data.a].b) + '2'`);
+      expect(transformExpression('1{{x[a].b}}2')).toMatchSnapshot();
     });
   });
 
