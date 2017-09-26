@@ -25334,13 +25334,22 @@ function escapeString(str) {
 }
 
 function transformCode(code_, scope, config) {
+  var forbiddenPath = void 0;
   var visitor = {
     noScope: 1,
+    exit: function exit(path) {
+      if (forbiddenPath === path) {
+        forbiddenPath = undefined;
+      }
+    },
     enter: function enter(path) {
       var node = path.node,
           parent = path.parent;
 
       if (parent && parent.callee === node) {
+        if (!forbiddenPath) {
+          forbiddenPath = path;
+        }
         return;
       }
       if (node.type === 'Identifier') {
@@ -25349,11 +25358,18 @@ function transformCode(code_, scope, config) {
           node.name = 'data.' + node.name;
         }
       }
-
+      if (forbiddenPath) {
+        return;
+      }
       if (config.strictDataMember === false) {
         // allow {{x.y.z}} even x is undefined
         if (node.type !== 'MemberExpression') {
           return;
+        }
+
+        var rootMember = node;
+        while (rootMember && rootMember.type === 'MemberExpression') {
+          rootMember = rootMember.parent;
         }
 
         var members = [node];
@@ -37905,7 +37921,9 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
     var _config = this.config,
         _config$importCompone = _config.importComponent,
         importComponent = _config$importCompone === undefined ? defaultImportComponent : _config$importCompone,
-        pure = _config.pure;
+        pure = _config.pure,
+        strictDataMember = _config.strictDataMember,
+        pureTemplateFactory = _config.pureTemplateFactory;
 
 
     var handler = new __WEBPACK_IMPORTED_MODULE_3_domhandler___default.a(function (error, children) {
@@ -37941,14 +37959,17 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         }
         return done(e);
       }
-      if (_this2.config.strictDataMember === false) {
-        header.push('\nfunction $getLooseDataMember(target, ...args) {\n  let ret = target;\n  for(let i=0; i<args.length; i++){\n    if(ret == null){\n      return ret;\n    }\n    ret = ret[args[i]];\n  }\n  return ret;\n}\n  ');
+      if (strictDataMember === false) {
+        header.push('import $getLooseDataMember from \'rml/runtime/getLooseDataMember\';');
+      }
+      if (pure) {
+        header.push('import $createReactPureComponentClass from \'rml/runtime/createReactPureComponentClass\';');
       }
       var subTemplatesName = [];
       Object.keys(importTplDeps).forEach(function (dep) {
         var index = importTplDeps[dep];
-        header.push(IMPORT + ' { $ownTemplates$ as $ownTemplates$' + index + ' } ' + ('from \'' + dep + '\';'));
-        subTemplatesName.push('$ownTemplates$' + index);
+        header.push(IMPORT + ' { $ownTemplates as $ownTemplates' + index + ' } ' + ('from \'' + dep + '\';'));
+        subTemplatesName.push('$ownTemplates' + index);
       });
       Object.keys(includeTplDeps).forEach(function (dep) {
         var index = includeTplDeps[dep];
@@ -37957,8 +37978,9 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
       header.push(''); // empty line
       var needTemplate = Object.keys(subTemplatesCode).length || Object.keys(importTplDeps).length;
       if (needTemplate) {
-        header.push('let $templates$ = {};');
-        header.push('export const $ownTemplates$ = {};');
+        header.push('let $templates = {};');
+        header.push('let $template;');
+        header.push('export const $ownTemplates = {};');
       }
       Object.keys(subTemplatesCode).forEach(function (name) {
         var _subTemplatesCode$nam = subTemplatesCode[name],
@@ -37966,28 +37988,24 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
             node = _subTemplatesCode$nam.node;
 
         if (templateCode.length) {
-          header.push('$ownTemplates$[\'' + name + '\'] = function (data) {');
+          header.push('$template = $ownTemplates[\'' + name + '\'] = function (data) {');
           _this2.pushHeaderCode(2, 'return (');
           header = _this2.header = header.concat(templateCode);
           _this2.pushHeaderCode(2, ');');
           header.push('};');
           if (pure) {
-            var pureTemplateFactory = _this2.config.pureTemplateFactory;
-
             if (pureTemplateFactory) {
               header.push(pureTemplateFactory({ node: node }));
             } else {
-              var className = name.replace(/[-/]/g, '$_$');
-              var ReactClass = '$ReactClass_' + className;
-              header.push('\nclass ' + ReactClass + ' extends React.PureComponent {\n  render() {\n    const children = $ownTemplates$[\'' + name + '\'].call(this.props.children, this.props);\n    if(React.Children.count(children) > 1) {\n      throw new Error(\'template `' + name + '` can only has one render child!\');\n    }\n    return children;\n  }\n}\n$ownTemplates$[\'' + name + '\'].Component = ' + ReactClass + ';\n');
+              header.push('\n$template.Component = $createReactPureComponentClass(\'' + name + '\', $template);\n');
             }
           }
         }
       });
       if (Object.keys(importTplDeps).length) {
-        header.push('$templates$ = Object.assign($templates$, ' + (subTemplatesName.join(' ,') + ', $ownTemplates$);'));
+        header.push('$templates = Object.assign($templates, ' + (subTemplatesName.join(' ,') + ', $ownTemplates);'));
       } else if (needTemplate) {
-        header.push('$templates$ = $ownTemplates$;');
+        header.push('$templates = $ownTemplates;');
       }
       header.push(HEADER);
       _this2.pushHeaderCode(2, 'return (');
@@ -38237,7 +38255,7 @@ __WEBPACK_IMPORTED_MODULE_1_object_assign___default()(MLTransformer.prototype, {
         });
         this.pushCode(level, '' + (this.isStartOfCodeSection(level) ? '{ ' : '') + (pure ?
         // parent passed as children...
-        'React.createElement($templates$[' + is + '].Component, ' + data + ', this)' : '$templates$[' + is + '].call(this, ' + data + ')') + (this.isEndOfCodeSection(level) ? ' }' : ''));
+        'React.createElement($templates[' + is + '].Component, ' + data + ', this)' : '$templates[' + is + '].call(this, ' + data + ')') + (this.isEndOfCodeSection(level) ? ' }' : ''));
       } else {
         this.pushState();
         var name = attrs.name;
