@@ -1,6 +1,10 @@
 # History
 ----
 
+## 0.8.0 / 2017-09-26
+
+- extract runtime lib
+
 ## 0.7.0 / 2017-08-21
 
 - add pureTemplateFactory config

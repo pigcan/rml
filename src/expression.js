@@ -40,11 +40,20 @@ function escapeString(str) {
 }
 
 function transformCode(code_, scope, config) {
+  let forbiddenPath;
   const visitor = {
     noScope: 1,
+    exit(path) {
+      if (forbiddenPath === path) {
+        forbiddenPath = undefined;
+      }
+    },
     enter(path) {
       const { node, parent } = path;
       if (parent && parent.callee === node) {
+        if (!forbiddenPath) {
+          forbiddenPath = path;
+        }
         return;
       }
       if (node.type === 'Identifier') {
@@ -71,11 +80,18 @@ function transformCode(code_, scope, config) {
           node.name = `data.${node.name}`;
         }
       }
-
+      if (forbiddenPath) {
+        return;
+      }
       if (config.strictDataMember === false) {
         // allow {{x.y.z}} even x is undefined
         if (node.type !== 'MemberExpression') {
           return;
+        }
+
+        let rootMember = node;
+        while (rootMember && rootMember.type === 'MemberExpression') {
+          rootMember = rootMember.parent;
         }
 
         const members = [node];

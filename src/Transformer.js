@@ -154,6 +154,8 @@ assign(MLTransformer.prototype, {
     const {
       importComponent = defaultImportComponent,
       pure,
+      strictDataMember,
+      pureTemplateFactory,
     } = this.config;
 
     const handler = new DomHandler((error, children) => {
@@ -189,26 +191,20 @@ assign(MLTransformer.prototype, {
         }
         return done(e);
       }
-      if (this.config.strictDataMember === false) {
-        header.push(`
-function $getLooseDataMember(target, ...args) {
-  let ret = target;
-  for(let i=0; i<args.length; i++){
-    if(ret == null){
-      return ret;
-    }
-    ret = ret[args[i]];
-  }
-  return ret;
-}
-  `);
+      if (strictDataMember === false) {
+        header.push(`import $getLooseDataMember from 'rml/runtime/getLooseDataMember';`);
+      }
+      if (pure) {
+        header.push(
+          `import $createReactPureComponentClass from 'rml/runtime/createReactPureComponentClass';`
+        );
       }
       const subTemplatesName = [];
       Object.keys(importTplDeps).forEach((dep) => {
         const index = importTplDeps[dep];
-        header.push(`${IMPORT} { $ownTemplates$ as $ownTemplates$${index} } ` +
+        header.push(`${IMPORT} { $ownTemplates as $ownTemplates${index} } ` +
           `from '${dep}';`);
-        subTemplatesName.push(`$ownTemplates$${index}`);
+        subTemplatesName.push(`$ownTemplates${index}`);
       });
       Object.keys(includeTplDeps).forEach((dep) => {
         const index = includeTplDeps[dep];
@@ -218,45 +214,34 @@ function $getLooseDataMember(target, ...args) {
       const needTemplate = Object.keys(subTemplatesCode).length ||
         Object.keys(importTplDeps).length;
       if (needTemplate) {
-        header.push(`let $templates$ = {};`);
-        header.push(`export const $ownTemplates$ = {};`);
+        header.push(`let $templates = {};`);
+        header.push(`let $template;`);
+        header.push(`export const $ownTemplates = {};`);
       }
       Object.keys(subTemplatesCode).forEach((name) => {
         const { code: templateCode, node } = subTemplatesCode[name];
         if (templateCode.length) {
-          header.push(`$ownTemplates$['${name}'] = function (data) {`);
+          header.push(`$template = $ownTemplates['${name}'] = function (data) {`);
           this.pushHeaderCode(2, 'return (');
           header = this.header = header.concat(templateCode);
           this.pushHeaderCode(2, ');');
           header.push('};');
           if (pure) {
-            const { pureTemplateFactory } = this.config;
             if (pureTemplateFactory) {
               header.push(pureTemplateFactory({ node }));
             } else {
-              const className = name.replace(/[-/]/g, '$_$');
-              const ReactClass = `$ReactClass_${className}`;
               header.push(`
-class ${ReactClass} extends React.PureComponent {
-  render() {
-    const children = $ownTemplates$['${name}'].call(this.props.children, this.props);
-    if(React.Children.count(children) > 1) {
-      throw new Error('template \`${name}\` can only has one render child!');
-    }
-    return children;
-  }
-}
-$ownTemplates$['${name}'].Component = ${ReactClass};
+$template.Component = $createReactPureComponentClass('${name}', $template);
 `);
             }
           }
         }
       });
       if (Object.keys(importTplDeps).length) {
-        header.push(`$templates$ = Object.assign($templates$, ` +
-          `${subTemplatesName.join(' ,')}, $ownTemplates$);`);
+        header.push(`$templates = Object.assign($templates, ` +
+          `${subTemplatesName.join(' ,')}, $ownTemplates);`);
       } else if (needTemplate) {
-        header.push(`$templates$ = $ownTemplates$;`);
+        header.push(`$templates = $ownTemplates;`);
       }
       header.push(HEADER);
       this.pushHeaderCode(2, 'return (');
@@ -518,8 +503,8 @@ ${this.template.slice(startIndex, endIndex)}`;
             this.isStartOfCodeSection(level) ? '{ ' : ''
             }${pure ?
             // parent passed as children...
-            `React.createElement($templates$[${is}].Component, ${data}, this)` :
-            `$templates$[${is}].call(this, ${data})`}${
+            `React.createElement($templates[${is}].Component, ${data}, this)` :
+            `$templates[${is}].call(this, ${data})`}${
             this.isEndOfCodeSection(level) ? ' }' : ''
             }`);
       } else {

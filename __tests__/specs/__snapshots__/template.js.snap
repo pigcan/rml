@@ -32,10 +32,12 @@ export default function render(data) {
 
 exports[`MLTransformer template pure only allow one child 1`] = `
 "import React from 'react';
+import $createReactPureComponentClass from 'rml/runtime/createReactPureComponentClass';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$ownTemplates$['t'] = function (data) {
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$template = $ownTemplates['t'] = function (data) {
   return (
     [
     <div>
@@ -50,22 +52,13 @@ $ownTemplates$['t'] = function (data) {
   );
 };
 
-class $ReactClass_t extends React.PureComponent {
-  render() {
-    const children = $ownTemplates$['t'].call(this.props.children, this.props);
-    if(React.Children.count(children) > 1) {
-      throw new Error('template \`t\` can only has one render child!');
-    }
-    return children;
-  }
-}
-$ownTemplates$['t'].Component = $ReactClass_t;
+$template.Component = $createReactPureComponentClass('t', $template);
 
-$templates$ = $ownTemplates$;
+$templates = $ownTemplates;
 export default function render(data) {
   return (
     <div>
-      { React.createElement($templates$[(data.x % 2 ? 't' : 'z')].Component, (({ ...data.o })), this) }
+      { React.createElement($templates[(data.x % 2 ? 't' : 'z')].Component, (({ ...data.o })), this) }
     </div>
   );
 };"
@@ -73,23 +66,24 @@ export default function render(data) {
 
 exports[`MLTransformer template support import 1`] = `
 "import React from 'react';
-import { $ownTemplates$ as $ownTemplates$1 } from 'a.rml';
-import { $ownTemplates$ as $ownTemplates$2 } from './a.rml';
+import { $ownTemplates as $ownTemplates1 } from 'a.rml';
+import { $ownTemplates as $ownTemplates2 } from './a.rml';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$ownTemplates$['t'] = function (data) {
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$template = $ownTemplates['t'] = function (data) {
   return (
     <div>
       {(data.z)}
     </div>
   );
 };
-$templates$ = Object.assign($templates$, $ownTemplates$1 ,$ownTemplates$2, $ownTemplates$);
+$templates = Object.assign($templates, $ownTemplates1 ,$ownTemplates2, $ownTemplates);
 export default function render(data) {
   return (
     <div>
-      { $templates$[\`t\`].call(this, (({ o: data.o }))) }
+      { $templates[\`t\`].call(this, (({ o: data.o }))) }
     </div>
   );
 };"
@@ -97,11 +91,12 @@ export default function render(data) {
 
 exports[`MLTransformer template support import absolute 1`] = `
 "import React from 'react';
-import { $ownTemplates$ as $ownTemplates$1 } from '../../a.rml';
+import { $ownTemplates as $ownTemplates1 } from '../../a.rml';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$templates$ = Object.assign($templates$, $ownTemplates$1, $ownTemplates$);
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$templates = Object.assign($templates, $ownTemplates1, $ownTemplates);
 export default function render(data) {
   return (
 null
@@ -111,10 +106,12 @@ null
 
 exports[`MLTransformer template support pure 1`] = `
 "import React from 'react';
+import $createReactPureComponentClass from 'rml/runtime/createReactPureComponentClass';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$ownTemplates$['t'] = function (data) {
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$template = $ownTemplates['t'] = function (data) {
   return (
     <div>
       {(data.z)}
@@ -122,22 +119,13 @@ $ownTemplates$['t'] = function (data) {
   );
 };
 
-class $ReactClass_t extends React.PureComponent {
-  render() {
-    const children = $ownTemplates$['t'].call(this.props.children, this.props);
-    if(React.Children.count(children) > 1) {
-      throw new Error('template \`t\` can only has one render child!');
-    }
-    return children;
-  }
-}
-$ownTemplates$['t'].Component = $ReactClass_t;
+$template.Component = $createReactPureComponentClass('t', $template);
 
-$templates$ = $ownTemplates$;
+$templates = $ownTemplates;
 export default function render(data) {
   return (
     <div>
-      { React.createElement($templates$[(data.x % 2 ? 't' : 'z')].Component, (({ ...data.o })), this) }
+      { React.createElement($templates[(data.x % 2 ? 't' : 'z')].Component, (({ ...data.o })), this) }
     </div>
   );
 };"
@@ -146,20 +134,21 @@ export default function render(data) {
 exports[`MLTransformer template support simple 1`] = `
 "import React from 'react';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$ownTemplates$['t'] = function (data) {
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$template = $ownTemplates['t'] = function (data) {
   return (
     <div>
       {(data.z)}
     </div>
   );
 };
-$templates$ = $ownTemplates$;
+$templates = $ownTemplates;
 export default function render(data) {
   return (
     <div>
-      { $templates$[(data.x % 2 ? 't' : 'z')].call(this, (({ ...data.o }))) }
+      { $templates[(data.x % 2 ? 't' : 'z')].call(this, (({ ...data.o }))) }
     </div>
   );
 };"
@@ -167,31 +156,33 @@ export default function render(data) {
 
 exports[`MLTransformer template support standalone 1`] = `
 "import React from 'react';
-import { $ownTemplates$ as $ownTemplates$1 } from './q';
-import { $ownTemplates$ as $ownTemplates$2 } from 'q';
+import { $ownTemplates as $ownTemplates1 } from './q';
+import { $ownTemplates as $ownTemplates2 } from 'q';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$templates$ = Object.assign($templates$, $ownTemplates$1 ,$ownTemplates$2, $ownTemplates$);
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$templates = Object.assign($templates, $ownTemplates1 ,$ownTemplates2, $ownTemplates);
 export default function render(data) {
   return (
-    $templates$[\`z\`].call(this, undefined)
+    $templates[\`z\`].call(this, undefined)
   );
 };"
 `;
 
 exports[`MLTransformer template support standalone array 1`] = `
 "import React from 'react';
-import { $ownTemplates$ as $ownTemplates$1 } from 'q';
-import { $ownTemplates$ as $ownTemplates$2 } from './q';
+import { $ownTemplates as $ownTemplates1 } from 'q';
+import { $ownTemplates as $ownTemplates2 } from './q';
 
-let $templates$ = {};
-export const $ownTemplates$ = {};
-$templates$ = Object.assign($templates$, $ownTemplates$1 ,$ownTemplates$2, $ownTemplates$);
+let $templates = {};
+let $template;
+export const $ownTemplates = {};
+$templates = Object.assign($templates, $ownTemplates1 ,$ownTemplates2, $ownTemplates);
 export default function render(data) {
   return (
     [
-    $templates$[\`z\`].call(this, undefined)
+    $templates[\`z\`].call(this, undefined)
     ,
     <view>
     </view>

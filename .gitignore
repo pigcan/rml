@@ -28,3 +28,4 @@ build/
 yarn.lock
 /lib/
 /es/
+/runtime/

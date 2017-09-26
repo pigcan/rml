@@ -64,8 +64,8 @@ describe('transformExpression', () => {
     const args = [null, {
       strictDataMember: false,
     }];
-    it('support member function', () => {
-      expect(transformExpression('{{x.y.join(",")}}', ...args)).toMatchSnapshot();
+    it('ignore member function', () => {
+      expect(transformExpression('{{x.y.join(q.a) + z.a}}', ...args)).toMatchSnapshot();
     });
     it('support simple', () => {
       expect(transformExpression('{{x}}', ...args)).toMatchSnapshot();
