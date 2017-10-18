@@ -83,7 +83,7 @@ $templates = Object.assign($templates, $ownTemplates1 ,$ownTemplates2, $ownTempl
 export default function render(data) {
   return (
     <div>
-      { $templates[\`t\`].call(this, (({ o: data.o }))) }
+      { $templates['t'].call(this, (({ o: data.o }))) }
     </div>
   );
 };"
@@ -165,7 +165,7 @@ export const $ownTemplates = {};
 $templates = Object.assign($templates, $ownTemplates1 ,$ownTemplates2, $ownTemplates);
 export default function render(data) {
   return (
-    $templates[\`z\`].call(this, undefined)
+    $templates['z'].call(this, undefined)
   );
 };"
 `;
@@ -182,7 +182,7 @@ $templates = Object.assign($templates, $ownTemplates1 ,$ownTemplates2, $ownTempl
 export default function render(data) {
   return (
     [
-    $templates[\`z\`].call(this, undefined)
+    $templates['z'].call(this, undefined)
     ,
     <view>
     </view>

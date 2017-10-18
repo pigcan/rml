@@ -8,7 +8,7 @@ exports[`transformExpression loose data member support [] member 1`] = `"($getLo
 
 exports[`transformExpression loose data member support expression member 1`] = `"($getLooseDataMember(data.x, \\"a\\") + $getLooseDataMember(data.x, data.b))"`;
 
-exports[`transformExpression loose data member support interpolate member 1`] = `"\`1\` + ($getLooseDataMember(data.x, data.a, \\"b\\")) + \`2\`"`;
+exports[`transformExpression loose data member support interpolate member 1`] = `"'1' + ($getLooseDataMember(data.x, data.a, \\"b\\")) + '2'"`;
 
 exports[`transformExpression loose data member support simple 1`] = `"(data.x)"`;
 
@@ -16,7 +16,7 @@ exports[`transformExpression loose data member support simple member 1`] = `"($g
 
 exports[`transformExpression member expression support [] 1`] = `"(data.x[data.a].b)"`;
 
-exports[`transformExpression member expression support interpolate 1`] = `"\`1\` + (data.x[data.a].b) + \`2\`"`;
+exports[`transformExpression member expression support interpolate 1`] = `"'1' + (data.x[data.a].b) + '2'"`;
 
 exports[`transformExpression member expression support member function 1`] = `"(data.x.y.join(\\",\\"))"`;
 
@@ -32,11 +32,11 @@ exports[`transformExpression support array 1`] = `"([data.x, 2])"`;
 
 exports[`transformExpression support forceObject 1`] = `"(({ x: data.x }))"`;
 
-exports[`transformExpression support interpolate 1`] = `"\`1-\` + (data.x + data.y) + \`-2\`"`;
+exports[`transformExpression support interpolate 1`] = `"'1-' + (data.x + data.y) + '-2'"`;
 
-exports[`transformExpression support interpolate 2 1`] = `"(data.x + data.y) + \`-2\`"`;
+exports[`transformExpression support interpolate 2 1`] = `"(data.x + data.y) + '-2'"`;
 
-exports[`transformExpression support literal 1`] = `"\`x\`"`;
+exports[`transformExpression support literal 1`] = `"'x'"`;
 
 exports[`transformExpression support logic 1`] = `"(data.x > 5)"`;
 
