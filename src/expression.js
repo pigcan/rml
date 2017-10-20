@@ -4,6 +4,7 @@
 // or use complex parser
 // const util = require('util');
 let babylon = require('babylon');
+const assign = require('object-assign');
 let traverse = require('babel-traverse');
 let generate = require('babel-generator');
 let t = require('babel-types');
@@ -40,51 +41,18 @@ function escapeString(str) {
 }
 
 function transformCode(code_, scope, config) {
-  const visitor = {
-    noScope: 1,
-    enter(path) {
-      const { node, parent } = path;
-      if (node.__appxSkip) {
-        path.skip();
-        return;
-      }
+  const loopDataVisitor = config.strictDataMember === false ? {
+    MemberExpression(path) {
+      const { parent, node } = path;
       const parentType = parent && parent.type;
-      if (node.type === 'Identifier') {
-        if (
-          (
-            // ignore y for x.y
-            parentType !== 'MemberExpression' ||
-            // x.y for x
-            parent.object === node ||
-            (
-              // consider y for x[y]
-              parent.property === node &&
-              parent.computed
-            )
-          )
-          &&
-          (
-            // {x:y} only for y
-            parentType !== 'ObjectProperty' ||
-            parent.key !== node
-          )
-          &&
-          (
-            !findScope(scope, node.name)
-          )
-        ) {
-          node.name = `data.${node.name}`;
-        }
-      }
-      // do not transform function call
+// do not transform function call
       // skip call callee x[y.q]
-      if (config.strictDataMember === false &&
+      if (
         // root member node
-        parentType !== 'MemberExpression' &&
-        node.type === 'MemberExpression' &&
-        parent.callee !== node) {
+      parentType !== 'MemberExpression' &&
+      // skip call callee x[y.q]
+      parent.callee !== node) {
         // allow {{x.y.z}} even x is undefined
-
         const members = [node];
         let root = node.object;
 
@@ -106,19 +74,32 @@ function transformCode(code_, scope, config) {
         }
 
         members.forEach((m) => {
+          // x[y]
           if (m.computed) {
             args.push(m.property);
           } else {
+            // x.y
             args.push(t.stringLiteral(m.property.name));
           }
         });
 
         const newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
-        newNode.callee.__appxSkip = 1;
+        newNode.callee.__rmlSkipped = 1;
+        // will process a.v of x.y[a.v]
         path.replaceWith(newNode);
       }
     },
-  };
+  } : {};
+  const visitor = assign({
+    noScope: 1,
+
+    ReferencedIdentifier(path) {
+      const { node } = path;
+      if (!node.__rmlSkipped && !findScope(scope, node.name)) {
+        node.name = `data.${node.name}`;
+      }
+    },
+  }, loopDataVisitor);
 
 
   let codeStr = code_;
