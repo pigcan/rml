@@ -2,6 +2,8 @@
 
 exports[`transformExpression keep this 1`] = `"(this.x)"`;
 
+exports[`transformExpression loose data member ignore member computed function 1`] = `"(data.x[data.y.q].join($getLooseDataMember(data.q, \\"a\\")) + $getLooseDataMember(data.z, \\"a\\"))"`;
+
 exports[`transformExpression loose data member ignore member function 1`] = `"(data.x.y.join($getLooseDataMember(data.q, \\"a\\")) + $getLooseDataMember(data.z, \\"a\\"))"`;
 
 exports[`transformExpression loose data member support [] member 1`] = `"($getLooseDataMember(data.x, data.a, \\"b\\"))"`;

@@ -67,6 +67,9 @@ describe('transformExpression', () => {
     it('ignore member function', () => {
       expect(transformExpression('{{x.y.join(q.a) + z.a}}', ...args)).toMatchSnapshot();
     });
+    it('ignore member computed function', () => {
+      expect(transformExpression('{{x[y.q].join(q.a) + z.a}}', ...args)).toMatchSnapshot();
+    });
     it('support simple', () => {
       expect(transformExpression('{{x}}', ...args)).toMatchSnapshot();
     });

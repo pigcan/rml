@@ -40,36 +40,32 @@ function escapeString(str) {
 }
 
 function transformCode(code_, scope, config) {
-  let forbiddenPath;
   const visitor = {
     noScope: 1,
-    exit(path) {
-      if (forbiddenPath === path) {
-        forbiddenPath = undefined;
-      }
-    },
     enter(path) {
       const { node, parent } = path;
-      if (parent && parent.callee === node) {
-        if (!forbiddenPath) {
-          forbiddenPath = path;
-        }
+      if (node.__appxSkip) {
+        path.skip();
         return;
       }
+      const parentType = parent && parent.type;
       if (node.type === 'Identifier') {
-        const type = parent && parent.type;
         if (
           (
-            type !== 'MemberExpression' ||
+            // ignore y for x.y
+            parentType !== 'MemberExpression' ||
+            // x.y for x
             parent.object === node ||
             (
+              // consider y for x[y]
               parent.property === node &&
               parent.computed
             )
           )
           &&
           (
-            type !== 'ObjectProperty' ||
+            // {x:y} only for y
+            parentType !== 'ObjectProperty' ||
             parent.key !== node
           )
           &&
@@ -80,19 +76,14 @@ function transformCode(code_, scope, config) {
           node.name = `data.${node.name}`;
         }
       }
-      if (forbiddenPath) {
-        return;
-      }
-      if (config.strictDataMember === false) {
+      // do not transform function call
+      // skip call callee x[y.q]
+      if (config.strictDataMember === false &&
+        // root member node
+        parentType !== 'MemberExpression' &&
+        node.type === 'MemberExpression' &&
+        parent.callee !== node) {
         // allow {{x.y.z}} even x is undefined
-        if (node.type !== 'MemberExpression') {
-          return;
-        }
-
-        let rootMember = node;
-        while (rootMember && rootMember.type === 'MemberExpression') {
-          rootMember = rootMember.parent;
-        }
 
         const members = [node];
         let root = node.object;
@@ -123,7 +114,7 @@ function transformCode(code_, scope, config) {
         });
 
         const newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
-
+        newNode.callee.__appxSkip = 1;
         path.replaceWith(newNode);
       }
     },
