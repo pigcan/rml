@@ -40,67 +40,70 @@ function escapeString(str) {
   return str.replace(/[\\']/g, '\\$&');
 }
 
-function transformCode(code_, scope, config) {
-  const loopDataVisitor = config.strictDataMember === false ? {
-    MemberExpression(path) {
-      const { parent, node } = path;
-      const parentType = parent && parent.type;
+
+const refVisitor = {
+  noScope: 1,
+
+  ReferencedIdentifier(path) {
+    const { node } = path;
+    if (!node.__rmlSkipped && !findScope(this.rmlScope, node.name)) {
+      node.name = `data.${node.name}`;
+    }
+  },
+};
+
+const looseDataVisitor = assign({
+  MemberExpression(path) {
+    const { parent, node } = path;
+    const parentType = parent && parent.type;
 // do not transform function call
-      // skip call callee x[y.q]
-      if (
-        // root member node
-      parentType !== 'MemberExpression' &&
-      // skip call callee x[y.q]
-      parent.callee !== node) {
-        // allow {{x.y.z}} even x is undefined
-        const members = [node];
-        let root = node.object;
+    // skip call callee x[y.q]
+    if (
+      // root member node
+    parentType !== 'MemberExpression' &&
+    // skip call callee x[y.q]
+    parent.callee !== node) {
+      // allow {{x.y.z}} even x is undefined
+      const members = [node];
+      let root = node.object;
 
-        while (root.type === 'MemberExpression') {
-          members.push(root);
-          root = root.object;
-        }
-
-        members.reverse();
-        const args = [root];
-
-        if (root.type === 'ThisExpression') {
-          args.pop();
-          args.push(members.shift());
-        }
-
-        if (!members.length) {
-          return;
-        }
-
-        members.forEach((m) => {
-          // x[y]
-          if (m.computed) {
-            args.push(m.property);
-          } else {
-            // x.y
-            args.push(t.stringLiteral(m.property.name));
-          }
-        });
-
-        const newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
-        newNode.callee.__rmlSkipped = 1;
-        // will process a.v of x.y[a.v]
-        path.replaceWith(newNode);
+      while (root.type === 'MemberExpression') {
+        members.push(root);
+        root = root.object;
       }
-    },
-  } : {};
-  const visitor = assign({
-    noScope: 1,
 
-    ReferencedIdentifier(path) {
-      const { node } = path;
-      if (!node.__rmlSkipped && !findScope(scope, node.name)) {
-        node.name = `data.${node.name}`;
+      members.reverse();
+      const args = [root];
+
+      if (root.type === 'ThisExpression') {
+        args.pop();
+        args.push(members.shift());
       }
-    },
-  }, loopDataVisitor);
 
+      if (!members.length) {
+        return;
+      }
+
+      members.forEach((m) => {
+        // x[y]
+        if (m.computed) {
+          args.push(m.property);
+        } else {
+          // x.y
+          args.push(t.stringLiteral(m.property.name));
+        }
+      });
+
+      const newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
+      newNode.callee.__rmlSkipped = 1;
+      // will process a.v of x.y[a.v]
+      path.replaceWith(newNode);
+    }
+  },
+}, refVisitor);
+
+function transformCode(code_, rmlScope, config) {
+  const visitor = config.strictDataMember === false ? looseDataVisitor : refVisitor;
 
   let codeStr = code_;
 
@@ -112,7 +115,7 @@ function transformCode(code_, scope, config) {
   // if (ast.type === 'Identifier') {
   //   ast.name = `data.${ast.name}`;
   // } else {
-  traverse(ast, visitor);
+  traverse(ast, visitor, undefined, { rmlScope });
   // }
   let { code } = generate(ast);
   if (code.charAt(code.length - 1) === ';') {
