@@ -25296,6 +25296,7 @@ function needsParens(node, parent, printStack) {
 // const util = require('util');
 
 var babylon = __webpack_require__(125);
+var assign = __webpack_require__(6);
 var traverse = __webpack_require__(47);
 var generate = __webpack_require__(283);
 var t = __webpack_require__(3);
@@ -25333,79 +25334,72 @@ function escapeString(str) {
   return str.replace(/[\\']/g, '\\$&');
 }
 
-function transformCode(code_, scope, config) {
-  var forbiddenPath = void 0;
-  var visitor = {
-    noScope: 1,
-    exit: function exit(path) {
-      if (forbiddenPath === path) {
-        forbiddenPath = undefined;
-      }
-    },
-    enter: function enter(path) {
-      var node = path.node,
-          parent = path.parent;
+var refVisitor = {
+  noScope: 1,
 
-      if (parent && parent.callee === node) {
-        if (!forbiddenPath) {
-          forbiddenPath = path;
-        }
-        return;
-      }
-      if (node.type === 'Identifier') {
-        var type = parent && parent.type;
-        if ((type !== 'MemberExpression' || parent.object === node || parent.property === node && parent.computed) && (type !== 'ObjectProperty' || parent.key !== node) && !findScope(scope, node.name)) {
-          node.name = 'data.' + node.name;
-        }
-      }
-      if (forbiddenPath) {
-        return;
-      }
-      if (config.strictDataMember === false) {
-        // allow {{x.y.z}} even x is undefined
-        if (node.type !== 'MemberExpression') {
-          return;
-        }
+  ReferencedIdentifier: function ReferencedIdentifier(path) {
+    var node = path.node;
 
-        var rootMember = node;
-        while (rootMember && rootMember.type === 'MemberExpression') {
-          rootMember = rootMember.parent;
-        }
-
-        var members = [node];
-        var root = node.object;
-
-        while (root.type === 'MemberExpression') {
-          members.push(root);
-          root = root.object;
-        }
-
-        members.reverse();
-        var args = [root];
-
-        if (root.type === 'ThisExpression') {
-          args.pop();
-          args.push(members.shift());
-        }
-
-        if (!members.length) {
-          return;
-        }
-
-        members.forEach(function (m) {
-          if (m.computed) {
-            args.push(m.property);
-          } else {
-            args.push(t.stringLiteral(m.property.name));
-          }
-        });
-
-        var newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
-
-        path.replaceWith(newNode);
-      }
+    if (!node.__rmlSkipped && !findScope(this.rmlScope, node.name)) {
+      node.name = 'data.' + node.name;
     }
-  };
+  }
+};
+
+var looseDataVisitor = assign({
+  MemberExpression: function MemberExpression(path) {
+    var parent = path.parent,
+        node = path.node;
+
+    var parentType = parent && parent.type;
+    // do not transform function call
+    // skip call callee x[y.q]
+    if (
+    // root member node
+    parentType !== 'MemberExpression' &&
+    // skip call callee x[y.q]
+    parent.callee !== node) {
+      // allow {{x.y.z}} even x is undefined
+      var members = [node];
+      var root = node.object;
+
+      while (root.type === 'MemberExpression') {
+        members.push(root);
+        root = root.object;
+      }
+
+      members.reverse();
+      var args = [root];
+
+      if (root.type === 'ThisExpression') {
+        args.pop();
+        args.push(members.shift());
+      }
+
+      if (!members.length) {
+        return;
+      }
+
+      members.forEach(function (m) {
+        // x[y]
+        if (m.computed) {
+          args.push(m.property);
+        } else {
+          // x.y
+          args.push(t.stringLiteral(m.property.name));
+        }
+      });
+
+      var newNode = t.callExpression(t.identifier('$getLooseDataMember'), args);
+      newNode.callee.__rmlSkipped = 1;
+      // will process a.v of x.y[a.v]
+      path.replaceWith(newNode);
+    }
+  }
+}, refVisitor);
+
+function transformCode(code_, rmlScope, config) {
+  var visitor = config.strictDataMember === false ? looseDataVisitor : refVisitor;
 
   var codeStr = code_;
 
@@ -25417,7 +25411,7 @@ function transformCode(code_, scope, config) {
   // if (ast.type === 'Identifier') {
   //   ast.name = `data.${ast.name}`;
   // } else {
-  traverse(ast, visitor);
+  traverse(ast, visitor, undefined, { rmlScope: rmlScope });
   // }
 
   var _generate = generate(ast),
