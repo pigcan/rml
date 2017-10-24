@@ -192,11 +192,13 @@ assign(MLTransformer.prototype, {
         return done(e);
       }
       if (strictDataMember === false) {
-        header.push(`import $getLooseDataMember from 'rml/runtime/getLooseDataMember';`);
+        header.push(
+          `import $getLooseDataMember from require.resolve('rml/runtime/getLooseDataMember');`
+        );
       }
       if (pure) {
         header.push(
-          `import $createReactPureComponentClass from 'rml/runtime/createReactPureComponentClass';`
+          `import $createReactPureComponentClass from require.resolve('rml/runtime/createReactPureComponentClass');`
         );
       }
       const subTemplatesName = [];

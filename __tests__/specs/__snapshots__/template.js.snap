@@ -32,7 +32,7 @@ export default function render(data) {
 
 exports[`MLTransformer template pure only allow one child 1`] = `
 "import React from 'react';
-import $createReactPureComponentClass from 'rml/runtime/createReactPureComponentClass';
+import $createReactPureComponentClass from require.resolve('rml/runtime/createReactPureComponentClass');
 
 let $templates = {};
 let $template;
@@ -106,7 +106,7 @@ null
 
 exports[`MLTransformer template support pure 1`] = `
 "import React from 'react';
-import $createReactPureComponentClass from 'rml/runtime/createReactPureComponentClass';
+import $createReactPureComponentClass from require.resolve('rml/runtime/createReactPureComponentClass');
 
 let $templates = {};
 let $template;
